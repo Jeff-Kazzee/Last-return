@@ -467,6 +467,7 @@ class Watcher:
         bot_status: dict[str, str] = {}
         reviewed: list[str] = []
         blocked_bots: list[str] = []
+        pending_gate = 0
         for bot in GATING_BOTS + ADVISORY_BOTS:
             own_checks = {name: c for name, c in checks.items() if bot_name(name) == bot}
             summaries = [c for c in comments if bot_name(who(c)[0]) == bot]
@@ -478,6 +479,9 @@ class Watcher:
             finished = bool(own_checks) and all(c["bucket"] != "pending" for c in own_checks.values())
             done = evidence or passed
             seen = bool(own_checks or summaries or own_reviews)
+            if bot in GATING_BOTS and own_checks and not finished:
+                # Still in flight: this bot may yet review the head.
+                pending_gate += 1
             if finished and unreviewed and not done:
                 states = ", ".join(f"{name} {own_checks[name]['bucket']}" for name in unreviewed)
                 bot_status[bot] = f"{bot} {states} without a review"
@@ -559,8 +563,10 @@ class Watcher:
             # A review bot whose check failed, was cancelled, or was skipped on
             # this head never reviewed it, so `ready` is blocked. Say so instead
             # of reporting a green that no review backs. Another gating bot that
-            # did review the head still satisfies the gate.
-            if self.until == "ready" and green and blocked_bots and not reviewed:
+            # did review the head still satisfies the gate, and a gating bot whose
+            # checks are still running may yet review it, so only stop once every
+            # gating bot has settled.
+            if self.until == "ready" and green and blocked_bots and not reviewed and not pending_gate:
                 self.finish(1, [f"blocked: no review of {short} from {'; '.join(blocked_bots)}"])
             if green and self.until == "green":
                 self.reported.add(checks_key)
