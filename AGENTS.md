@@ -25,3 +25,11 @@ Read [branching policy](docs/BRANCHING.md) and the [release checklist](docs/RELE
 Only the owner merges PRs. Promote `dev` to `prod` through an owner-approved release PR. Start emergency `hotfix/*` branches from `prod`, target `prod`, and reconcile the fix into `dev` through a separate PR.
 
 Record the candidate SHA, test commands, results, and any skipped checks before integration. The repository guard checks branch direction and basic hygiene. Report Godot tests and playtests separately.
+
+## Empirical and formal verification (mandatory for gameplay changes)
+
+Read [Cline skill bootstrap](docs/SKILL_BOOTSTRAP.md), [verification protocol](docs/VERIFICATION_PROTOCOL.md), and the [cloud launch instructions](docs/CLINE_VERIFIED_LAUNCH.md). The project vendors T-Stack under `.cline/skills/` (MIT, pinned upstream revision) plus a `last-return-verification` skill. Read installed instructions and verify availability before invoking; personal Windows skills or extra providers may not exist on the cloud worker.
+
+Use the task-specific verification skill and real application recipe when present. Establish a baseline and independent expectation, implement one bounded change, exercise static/behavior/live checks, and record exact evidence and revision. For core scoring/pause/retry state, build a finite explicit transition model and actually execute bounded/exhaustive invariant checking with a known-bad mutation; test the real Godot state transitions separately. A correct model alone is not proof of the implementation. Formal claims must name model, assumptions, bounds and checker. For continuous physics, use adversarial empirical tests and explain unproven cases.
+
+T-Stack may include `full-send`, but **this project categorically forbids unattended merging, auto-merging, bypassing review gates or production releases**. Use `full-stop` semantics and leave PRs open for owner approval. Council/sol-loop results require real reachable providers, not inferred access. Unavailable, skipped, rate-limited and headless-only checks must be labelled honestly.
