@@ -9,11 +9,13 @@
 - GitHub protection API checks for `dev` and `prod` returned HTTP 403 to this integration. No settings were changed. The documented owner-only PR gates remain authoritative.
 - Baseline oracle: no `project.godot` exists, so a playable import/gameplay check fails by absence. Expected first behavior and stable checks are defined in `docs/IMPLEMENTATION_PLAN.md` and `formal/README.md`.
 
-## Current milestone — lifecycle oracle
+## Lifecycle oracle and GDScript bridge
 
 - Added an explicit finite state-machine specification and bounded-exhaustive Python checker, including rejected events, progress tokens, retry reset, and an intentional duplicate-goal mutation.
 - Executed `scripts/verify_formal.sh`: clean model PASS with 932 states and 8,388 transitions; intentional duplicate-goal mutation produced exit 1 and trace `start → goal_player → goal_player`; wrapper exit 0. Python compilation and `git diff --check` passed.
-- Next: preserve this accepted lifecycle oracle in a milestone commit, then build the GDScript refinement and its integration tests.
+- Preserved the formal oracle in commit `4cd330059d2bb1c9714634f45192a37c0be27d88`.
+- Runtime red baseline: `godot --headless --path /workspace --script res://tests/test_runner.gd` exited 1 because `duel_rules.gd` was absent. Added only the public lifecycle implementation, reran the unchanged suite: 45 checks, 0 failures. Headless editor import also exited 0.
+- Next: implement fixed-step duel physics and fair rival movement behind stable deterministic and adversarial checks.
 
 ## Known unverified behavior
 

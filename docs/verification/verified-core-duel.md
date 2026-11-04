@@ -19,8 +19,10 @@ See `docs/IMPLEMENTATION_PLAN.md` and `formal/README.md` for the pre-implementat
 ## Godot import and runtime bridge
 
 - Planned command: `/workspace/.tools/godot --headless --path /workspace --editor --import --quit`.
-- Planned command: `/workspace/.tools/godot --headless --path /workspace --script res://tests/test_runner.gd`.
-- Result: **NOT RUN — implementation pending**.
+- Command: `/workspace/.tools/godot --headless --path /workspace --script res://tests/test_runner.gd`.
+- Lifecycle red baseline: missing `res://scripts/simulation/duel_rules.gd`, test command exit 1.
+- Lifecycle candidate result: **PASS — 45 checks, 0 failures**, test command exit 0. Covers initialization, start, both score attributions, duplicate goals, pause/resume, frozen clocks/timers, legal serve, fifth-goal finish, rejected finished-state restarts, complete retry, and automatic authorized transitions.
+- Headless import result at this milestone: **PASS**, editor import command exit 0 with no parser errors.
 
 ## Continuous physics and AI
 
