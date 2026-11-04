@@ -34,6 +34,13 @@ Finite samples are not proof for all floating-point inputs. The fixed oracle is 
 - Adversarial cases: analytic sweep vs naive end-overlap negative control; maximum-speed (1,050 units/s) top rail and paddle crossing; exact rail/paddle tie; active aim/pace cap; both goal attributions; post graze and closed side rail; duplicate crossing; pause immediately before impact; retry; AI displacement/acceleration/reaction; stationary defender for up to 120 simulated seconds.
 - Red/green record: initial implementation 76/80. AI 18-tick off-by-one fixed and unchanged test passed. Three remaining assertions traced to passive/active fixtures ending 4 px before paddle contact; starting distance corrected for both without changing assertions. Final unchanged behavior suite 80/80.
 
+## Breach simulation
+
+- Result: **PASS — 103 total checks, 0 failures** under `scripts/verify_godot.sh`; headless import also passed with no error diagnostics.
+- Ownership chain: enemy-owned target impact rejected; real active paddle contact changed ownership to player; that returned shot broke the mechanism; target break opened but did not itself complete the exit; entering the open exit completed the room.
+- Additional cases: closed-exit rejection, maximum-speed target sweep, full-state pause, three discrete body hits with invulnerability, failure and complete retry, sidearm armor non-bypass, and identical five-second breach traces.
+- Harness integrity: Godot emitted a GDScript compile error while exiting 0 during development; `scripts/verify_godot.sh` now fails on engine errors as well as nonzero status. No such diagnostics remain in the passing run.
+
 ## Real application and visual checks
 
 An isolated Xvfb display and actual input events will be used if the rendered engine launches. A screenshot alone will support only visual observations.

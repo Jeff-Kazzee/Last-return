@@ -17,7 +17,10 @@
 - Runtime red baseline: `godot --headless --path /workspace --script res://tests/test_runner.gd` exited 1 because `duel_rules.gd` was absent. Added only the public lifecycle implementation, reran the unchanged suite: 45 checks, 0 failures. Headless editor import also exited 0.
 - Added the fixed-step duel simulation and 35 public physics/AI checks. Initial run: 76/80 passed. Traced and fixed an AI reaction off-by-one (150 ms now means 18 ticks); the unchanged AI test passed while only the three contact-fixture assertions remained red. Corrected passive/active fixtures that stopped 4 px short of contact; all 80 checks then passed. No evaluator assertion was weakened.
 - Deterministic evidence: identical seed/input trace for 15 seconds; held-out seeds 7, 19, 43, 101, 509, 1021, 7919, 65537 for 20 seconds each; maximum-speed rail/paddle, exact tie, goal-edge, pause-at-impact, retry, AI speed/acceleration/reaction, and stationary-defender checks all green.
-- Next: preserve this simulation milestone and add the connected breach with return-ownership and room-reset checks.
+- Preserved duel simulation in commit `0da65ba800e7cfd267daf915a6fd2e45ef2cc0c4`.
+- Added the breach simulation and 23 checks. One initial fixture left the courier inside the closed exit; after moving that fixture away before target destruction, all 103 total checks passed. Enemy ownership rejects armor, real timed paddle ownership breaks it, the open exit requires entry, body damage/invulnerability/failure/retry, pause, maximum-speed contact, sidearm non-bypass, and deterministic traces are green.
+- Added `scripts/verify_godot.sh`; both engine exit status and `SCRIPT ERROR`/`ERROR`/`FAIL` diagnostics are fatal because an observed GDScript compile failure could otherwise exit 0. Headless import and mechanics both pass under this wrapper.
+- Next: preserve the breach milestone and connect both simulations to a rendered, input-driven Godot application.
 
 ## Known unverified behavior
 
