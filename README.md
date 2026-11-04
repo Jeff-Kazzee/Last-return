@@ -46,3 +46,9 @@ All rights reserved unless the repository owner adds an explicit license. Godot 
 Agents open PRs and report verification. The owner reviews and merges them. The repository guard checks branch direction and basic hygiene. Game tests and playtests have separate results.
 
 See the [branching policy](docs/BRANCHING.md) and [release checklist](docs/RELEASE_CHECKLIST.md).
+
+## Cloud coding agent skills and verification
+
+The project includes pinned [Theo/T-Stack skills](.cline/skills/) (MIT; upstream provenance in [bootstrap notes](docs/SKILL_BOOTSTRAP.md)), a dedicated [Last Return verification skill](.cline/skills/last-return-verification/SKILL.md), and a rigorous [verification protocol](docs/VERIFICATION_PROTOCOL.md) covering empirical evidence, formal finite-state checking, and runtime Godot checks.
+
+**Cloud Cline start:** copy the prompt in [CLINE_VERIFIED_LAUNCH.md](docs/CLINE_VERIFIED_LAUNCH.md), which builds on the original overnight implementation brief. The supporting source material lives in [docs/references](docs/references). Third-party skills are capability-dependent: a copied file does not guarantee installed cross-provider models or real review access. The agent stops at a reviewable PR into `dev` and never merges it.
