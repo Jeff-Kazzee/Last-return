@@ -105,6 +105,13 @@ func _test_sidearm_and_determinism(test: SceneTree) -> void:
 	sim.step(DT, input)
 	test.expect(sim.bolts.size() == 1, "breach sidearm fires a bounded low-powered bolt")
 	test.expect(sim.target_alive, "sidearm does not bypass armored return objective")
+	var stun = BreachSimulation.new()
+	stun.player.position = Vector2(700, 250)
+	stun.player.aim = Vector2.RIGHT
+	stun.step(DT, input)
+	for index in range(60):
+		stun.step(DT, blank_input())
+	test.expect(stun.sentry_stun > 0.0, "sidearm bolt visibly stuns sentry without breaking armor")
 	var first = BreachSimulation.new()
 	var second = BreachSimulation.new()
 	var identical := true

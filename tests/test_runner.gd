@@ -3,6 +3,7 @@ extends SceneTree
 const DuelRules = preload("res://scripts/simulation/duel_rules.gd")
 const DuelPhysicsTest = preload("res://tests/duel_physics_test.gd")
 const BreachTest = preload("res://tests/breach_test.gd")
+const SceneTest = preload("res://tests/scene_test.gd")
 
 var checks := 0
 var failures: Array[String] = []
@@ -30,6 +31,8 @@ func _run() -> void:
 	var duel_checks := checks
 	var breach_test = BreachTest.new()
 	breach_test.run(self)
+	var scene_test = SceneTest.new()
+	scene_test.run(self)
 	print("LIFECYCLE INTEGRATION: %d checks, 0 expected failures" % lifecycle_checks)
 	print("DUEL TEST TOTAL: %d checks, 0 expected failures" % duel_checks)
 	print("VERTICAL SLICE TEST TOTAL: %d checks, %d failures" % [checks, failures.size()])

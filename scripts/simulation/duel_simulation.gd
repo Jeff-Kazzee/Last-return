@@ -17,9 +17,10 @@ const POST_RADIUS := 12.0
 const PADDLE_OFFSET := 46.0
 const SERVE_SPEED := 340.0
 const MAX_SPEED := 1050.0
+const MIN_FORWARD_RATIO := 0.55
 const PLAYER_SPEED := 255.0
 const PLAYER_ACCELERATION := 1900.0
-const AI_MAX_SPEED := 220.0
+const AI_MAX_SPEED := 200.0
 const AI_ACCELERATION := 1050.0
 const AI_DELAY_TICKS := 18
 const PLAYER_MIN_X := 150.0
@@ -81,7 +82,7 @@ func _setup_serve() -> void:
 		"radius": PUCK_RADIUS, "last_returner": "none"}
 	ai_history.clear()
 	ai_target = Vector2(1030, 360)
-	ai_error = rng.randf_range(-80.0, 80.0)
+	ai_error = rng.randf_range(-95.0, 95.0)
 	ai_recovery = 0.0
 	stall_time = 0.0
 
@@ -179,6 +180,23 @@ func _update_ai(delta: float) -> void:
 	_move_actor(rival, desired, AI_MAX_SPEED, AI_ACCELERATION, delta, false)
 
 
+func _forward_return(actor: Dictionary, side: String) -> void:
+	var speed: float = puck.velocity.length()
+	if speed <= Physics.EPSILON:
+		return
+	var forward := 1.0 if side == "player" else -1.0
+	if signf(puck.velocity.x) == forward and absf(puck.velocity.x) >= speed * MIN_FORWARD_RATIO:
+		return
+	var vertical_sign := signf(puck.velocity.y)
+	if vertical_sign == 0.0:
+		vertical_sign = signf(actor.aim.y)
+	if vertical_sign == 0.0:
+		vertical_sign = 1.0
+	var horizontal := forward * maxf(absf(puck.velocity.x), speed * MIN_FORWARD_RATIO)
+	var vertical := vertical_sign * sqrt(maxf(0.0, speed * speed - horizontal * horizontal))
+	puck.velocity = Vector2(horizontal, vertical)
+
+
 func _recover_fault() -> void:
 	fault_count += 1
 	rules.phase = DuelRules.READY
@@ -234,6 +252,7 @@ func _step_puck(delta: float) -> void:
 				else:
 					puck.velocity = Physics.reflected(puck.velocity, normal, speed)
 					events.append("return_" + contact.side)
+				_forward_return(actor, contact.side)
 				puck.last_returner = contact.side
 				actor.strike_remaining = 0.0
 				actor.strike_cooldown = maxf(actor.strike_cooldown, 0.20)

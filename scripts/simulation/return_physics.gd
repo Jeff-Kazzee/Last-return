@@ -11,7 +11,8 @@ static func sweep_circle(start: Vector2, motion: Vector2, center: Vector2, radiu
 		return -1.0
 	var c := offset.length_squared() - radius * radius
 	if c <= 0.0:
-		return 0.0
+		# A departing overlap is separation from the previous contact, not a new hit.
+		return 0.0 if offset.dot(motion) < 0.0 else -1.0
 	var b := 2.0 * offset.dot(motion)
 	var discriminant := b * b - 4.0 * a * c
 	if discriminant < 0.0:

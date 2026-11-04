@@ -2,7 +2,43 @@
 
 **Last Return** is a proposed atmospheric 2D arcade escape game set inside **the Interval**, a dreaming dystopian city. Play centers on reading incoming projectiles, moving to intercept them, and **returning** them with purpose: in competitive paddle duels, short action breaches, and elaborate boss encounters.
 
-> **Status:** Design and pre-production. No playable game has been built or verified yet. The name and technical/content targets are provisional.
+> **Status:** A playable Godot 4 vertical slice now exists on the `feat/verified-core-duel` review branch: one first-to-five arcade duel and one connected return-combat breach. The broader game remains in development; campaign, boss, save, and trial targets are not implemented.
+
+## Play the vertical slice
+
+Open `project.godot` in **Godot 4.4.1** and run the project, or run `godot --path .` from a checkout with Godot on `PATH`. No plugins, downloaded assets, accounts, or network connection are required.
+
+1. Press **Enter** at the title. Score five goals before the Runner.
+2. Move into the core to make an ordinary return. Time **Strike** near actual paddle contact for a faster, aimed return.
+3. After winning, press **Enter** to enter the connected breach. Return the sentry's bright core into the armored mechanism, then move into the opened exit.
+
+| Action | Keyboard / mouse | Conventional gamepad |
+| --- | --- | --- |
+| Move | WASD | Left stick |
+| Aim | Mouse or arrow keys | Right stick |
+| Active return | Left mouse | Right trigger |
+| Dash | Space | Left shoulder |
+| Breach sidearm (sentry stun) | Right mouse | Left trigger |
+| Pause / resume | Escape | Menu / Start |
+| Retry | R | Keyboard currently required |
+| Confirm / enter next room | Enter | A / Cross |
+| Collision/AI debug | F3 | — |
+| Reduced effects | F4 | — |
+
+The duel uses a 120 Hz fixed-step simulation, swept projectile contacts, whole-core goal openings, a reaction-delayed physical rival, and complete pause/retry state ownership. The breach reuses the same return math and gives the courier three integrity points. Focus loss and controller disconnect pause play.
+
+## Reproduce verification
+
+With Godot 4.4.1 on `PATH` (or `GODOT=/absolute/path/to/godot`):
+
+```bash
+scripts/verify_formal.sh   # exhaustive discrete model + intentional invalid transition
+scripts/verify_godot.sh    # import diagnostics + lifecycle/physics/breach/scene tests
+scripts/verify_live.sh     # real main scene driven only through public Input actions
+scripts/verify_all.sh      # all three gates
+```
+
+See `docs/verification/verified-core-duel.md` for exact counts, seeds, formal bounds, GUI evidence, and limitations. A headless run is not a human playtest. Windows export/runtime, physical controller hardware, long-session balance, accessibility with users, and human judgments of fun remain unverified.
 
 ## Start here
 

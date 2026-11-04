@@ -14,6 +14,7 @@ func run(test: SceneTree) -> void:
 	_test_determinism_and_held_out_seeds(test)
 	_test_rival_constraints(test)
 	_test_stationary_defender(test)
+	_test_player_movement_dash_and_body(test)
 
 
 func blank_input() -> Dictionary:
@@ -39,6 +40,8 @@ func _test_swept_contact_and_negative_control(test: SceneTree) -> void:
 	test.expect(not naive_end_overlap and hit_time >= 0.0, "negative control: end-overlap misses fixture that sweep detects")
 	var miss: float = ReturnPhysics.sweep_circle(Vector2(0, 30), Vector2(200, 0), Vector2(100, 0), 10.0)
 	test.expect(miss < 0.0, "swept circle rejects separated path")
+	var departing: float = ReturnPhysics.sweep_circle(Vector2(95, 0), Vector2(-200, 0), Vector2(100, 0), 10.0)
+	test.expect(departing < 0.0, "overlapping departure is not a fresh collision")
 
 
 func _test_rail_and_paddle_adversaries(test: SceneTree) -> void:
@@ -62,6 +65,13 @@ func _test_rail_and_paddle_adversaries(test: SceneTree) -> void:
 	sim.step(0.1, blank_input())
 	test.expect(sim.puck.last_returner == "player", "exact rail/paddle contact tie favors paddle")
 	test.expect(sim.puck.velocity.length() <= sim.MAX_SPEED + 0.001, "tie resolution respects speed cap")
+	sim = live_sim()
+	sim.player.position = Vector2(250, 360)
+	sim.player.aim = Vector2.RIGHT
+	set_puck(sim, sim.paddle_center(sim.player) + Vector2(0, -80), Vector2(0, 600))
+	sim.step(0.1, blank_input())
+	test.expect(sim.puck.last_returner == "player" and sim.puck.velocity.x >= sim.puck.velocity.length() * 0.50, "vertical paddle contact retains majority forward travel")
+	test.expect(sim.puck.velocity.length() <= sim.MAX_SPEED + 0.001, "forward-travel correction preserves speed cap")
 
 
 func _test_active_return_contract(test: SceneTree) -> void:
@@ -200,3 +210,26 @@ func _test_stationary_defender(test: SceneTree) -> void:
 			break
 	test.expect(sim.rules.rival_score > 0, "stationary defender concedes under physical rival pressure")
 	test.expect(sim.rules.player_score < 5, "stationary defender cannot win first-to-five indefinitely")
+
+
+func _test_player_movement_dash_and_body(test: SceneTree) -> void:
+	var normal = live_sim()
+	var dashed = live_sim()
+	var move := blank_input()
+	move.move = Vector2.RIGHT
+	var dash_move := move.duplicate()
+	dash_move.dash = true
+	for index in range(30):
+		normal.step(DT, move)
+		dashed.step(DT, dash_move)
+		dash_move.dash = false
+	test.expect(normal.player.position.x > 260.0, "held movement physically moves courier")
+	test.expect(dashed.player.position.x > normal.player.position.x + 20.0, "dash produces a bounded movement burst")
+	test.expect(dashed.player.dash_cooldown > 0.0 and dashed.player.position.x <= dashed.PLAYER_MAX_X, "dash recovery and court bounds apply")
+	var body = live_sim()
+	body.player.position = Vector2(250, 360)
+	body.player.aim = Vector2.UP
+	set_puck(body, body.player.position + Vector2(35, 0), Vector2(-500, 0))
+	body.step(0.1, blank_input())
+	test.expect(body.puck.last_returner == "none" and is_equal_approx(body.puck.velocity.length(), 180.0), "duel body block is weak and not a controlled return")
+	test.expect(body.rules.player_score == 0 and body.rules.rival_score == 0, "legal body block does not invent score or damage")
