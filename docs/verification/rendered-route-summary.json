@@ -1,0 +1,46 @@
+{
+  "breach_completed": true,
+  "breach_events": [
+    "sentry_shot",
+    "return_player",
+    "target_break",
+    "breach_complete"
+  ],
+  "breach_exit_open": true,
+  "breach_health": 3,
+  "breach_player": {
+    "aim": "(1.0, 0.0)",
+    "dash_cooldown": 0.0,
+    "dash_remaining": 0.0,
+    "position": "(1089.291, 556.1432)",
+    "recoil": 0.0,
+    "strike_cooldown": 0.0,
+    "strike_remaining": 0.0,
+    "velocity": "(182.4442, 39.69313)"
+  },
+  "breach_time": 8.22500000000017,
+  "captures": [
+    "/workspace/artifacts/live/01-title.png",
+    "/workspace/artifacts/live/02-pause.png",
+    "/workspace/artifacts/live/03-duel.png",
+    "/workspace/artifacts/live/04-breach.png",
+    "/workspace/artifacts/live/06-open-exit.png"
+  ],
+  "driver_version": "live-v3-recovery-actions",
+  "duel_score": [
+    5,
+    0
+  ],
+  "duel_time": 103.875000000029,
+  "faults": 0,
+  "fixed_step_hz": 120,
+  "pause_checked": true,
+  "pause_frozen": false,
+  "player_returns": 25,
+  "player_strikes": 14,
+  "reason": "input-driven duel and breach completed",
+  "result": "PASS",
+  "state_forcing": "none: only Input actions and scene flow",
+  "ticks": 14370,
+  "evidence_note": "This rendered route used the final gameplay code. Its old asynchronous capture recorder repeated paths and sampled pause before the pause step settled, so pause_frozen=false here is a render-harness result; the final corrected live-v3 headless gate measured an exact freeze. Visual captures are a separate staged presentation run."
+}

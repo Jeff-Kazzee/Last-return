@@ -20,8 +20,20 @@
 - Preserved duel simulation in commit `0da65ba800e7cfd267daf915a6fd2e45ef2cc0c4`.
 - Added the breach simulation and 23 checks. One initial fixture left the courier inside the closed exit; after moving that fixture away before target destruction, all 103 total checks passed. Enemy ownership rejects armor, real timed paddle ownership breaks it, the open exit requires entry, body damage/invulnerability/failure/retry, pause, maximum-speed contact, sidearm non-bypass, and deterministic traces are green.
 - Added `scripts/verify_godot.sh`; both engine exit status and `SCRIPT ERROR`/`ERROR`/`FAIL` diagnostics are fatal because an observed GDScript compile failure could otherwise exit 0. Headless import and mechanics both pass under this wrapper.
-- Next: preserve the breach milestone and connect both simulations to a rendered, input-driven Godot application.
+- Preserved the breach milestone in commit `658b6b1d841a237e70777109835afe8fe29ad078`.
+
+## Playable application and empirical tuning
+
+- Added the title → duel → connected breach → departure flow, custom high-contrast presentation, keyboard/mouse/gamepad input map, focus/disconnect pause, retry, debug view, reduced-effects mode, and real scene integration tests.
+- Added an input-only application driver. No game state is assigned by the driver. Failures and traces remain in ignored `artifacts/`; the final driver uses `live-v3-recovery-actions`.
+- Tuning round 1: fixed a real swept-overlap defect in which a departing overlap was treated as a new collision. The unchanged live workload dropped from 1,585 to 16 player-return events, and pause comparison became exact after correcting sampler timing.
+- Tuning round 2: enforced a 55% minimum forward component on paddle returns after a strengthened test exposed 32% near-vertical pacing stalls. Speed and cap are preserved; meaningful angled banks remain possible.
+- Tuning round 3: reduced introductory-rival movement to 200 and widened prediction error to ±95 after the unchanged bot reached only 4–1 at 180 simulated seconds. Final public-edge AI speed/acceleration/reaction tests pass.
+- Final headless gates: formal 932 states / 8,388 transitions plus expected mutation failure; Godot 121 checks / 0 failures; input-only route 5–0 duel in 103.875 s, 14 strikes, exact pause freeze, breach target and exit completed in 8.225 s with 3 health.
+- Rendered route also completed under isolated Xvfb/Mesa. Captures are being archived under `docs/verification/captures/`; they are visual evidence, not performance or human-playtest claims.
+- Added `scripts/verify_all.sh`, `scripts/verify_live.sh`, and a pinned CI proposal at `docs/verification/game-verification.workflow.yml`. The cloud GitHub App rejected a push containing `.github/workflows/game-verification.yml` because it lacks `workflows` permission; the workflow was moved to the documented owner-installation path rather than weakening or bypassing credentials. No branch protection or repository setting was modified.
+- One same-harness independent review was requested but blocked by the reviewer provider usage limit before findings. No skill invocation or multi-provider review is claimed.
 
 ## Known unverified behavior
 
-All Godot implementation, rendered input gameplay, controller hardware, Windows export/runtime, human fun/readability, and performance remain unverified until separately executed and recorded. No claim is made from this planning work alone.
+Physical controller hardware, human mouse-aim play, Windows export and runtime, audio, human comprehension/fun, accessibility testing with users, frame-time/GPU performance, long-session stability, and continuous physics outside the finite test scenarios remain unverified. The formal abstraction does not cover runtime fault recovery or continuous motion. The branch is ready for owner review only; it is not merged or release-approved.
