@@ -26,7 +26,7 @@ func set_shot(sim: RefCounted, position: Vector2, velocity: Vector2, owner: Stri
 
 func _test_return_ownership_and_exit(test: SceneTree) -> void:
 	var sim = BreachSimulation.new()
-	test.expect(sim.health == 3 and sim.target_alive and not sim.exit_open, "breach initializes three health and armored closed exit")
+	test.expect(sim.health == 3 and sim.target_alive and sim.anchors_remaining == 2 and not sim.exit_open, "breach initializes three health, two locks, and a closed exit")
 	test.expect(sim.puck.active and sim.puck.last_returner == "enemy", "breach starts with one enemy-owned returnable core")
 	sim.player.position = sim.exit_center
 	sim.step(DT, blank_input())
@@ -35,9 +35,14 @@ func _test_return_ownership_and_exit(test: SceneTree) -> void:
 	set_shot(sim, sim.target_position + Vector2(-90, 0), Vector2(500, 0), "enemy")
 	sim.step(0.1, blank_input())
 	test.expect(sim.target_alive and not sim.exit_open, "negative control: enemy-owned shot cannot break mechanism")
+	var first_lock: Vector2 = sim.target_position
 	set_shot(sim, sim.target_position + Vector2(-90, 0), Vector2(500, 0), "player")
 	sim.step(0.1, blank_input())
-	test.expect(not sim.target_alive and sim.exit_open, "player-returned shot breaks mechanism and opens exit")
+	test.expect(sim.anchors_remaining == 1 and sim.target_alive and not sim.exit_open, "first returned hit damages one lock but keeps exit closed")
+	test.expect(sim.target_position != first_lock, "remaining lock changes the required aim")
+	set_shot(sim, sim.target_position + Vector2(-90, 0), Vector2(500, 0), "player")
+	sim.step(0.1, blank_input())
+	test.expect(not sim.target_alive and sim.anchors_remaining == 0 and sim.exit_open, "second player-returned hit breaks both locks and opens exit")
 	test.expect(not sim.completed, "target break alone does not teleport player to exit")
 	sim.player.position = sim.exit_center
 	sim.step(DT, blank_input())
@@ -58,7 +63,10 @@ func _test_real_paddle_to_target_chain(test: SceneTree) -> void:
 	test.expect(sim.health == 3, "paddle contact prevents breach body damage")
 	set_shot(sim, sim.target_position + Vector2(-90, 0), Vector2(500, 0), sim.puck.last_returner)
 	sim.step(0.1, blank_input())
-	test.expect(sim.exit_open, "actual paddle return ownership authorizes target break")
+	test.expect(sim.anchors_remaining == 1 and not sim.exit_open, "actual paddle return ownership damages first lock")
+	set_shot(sim, sim.target_position + Vector2(-90, 0), Vector2(500, 0), sim.puck.last_returner)
+	sim.step(0.1, blank_input())
+	test.expect(sim.exit_open, "second actual ownership-returned hit opens exit")
 
 
 func _test_pause_and_high_speed(test: SceneTree) -> void:
@@ -71,7 +79,10 @@ func _test_pause_and_high_speed(test: SceneTree) -> void:
 	test.expect(sim.snapshot() == before, "breach pause freezes impact, timers, health, and projectiles")
 	sim.paused = false
 	sim.step(0.1, blank_input())
-	test.expect(sim.exit_open, "maximum-speed returned core cannot tunnel through target")
+	test.expect(sim.anchors_remaining == 1 and not sim.exit_open, "maximum-speed returned core cannot tunnel through first lock")
+	set_shot(sim, sim.target_position + Vector2(-70, 0), Vector2(900, 0), "player")
+	sim.step(0.1, blank_input())
+	test.expect(sim.exit_open, "second maximum-speed lock hit opens exit")
 
 
 func _test_health_failure_and_retry(test: SceneTree) -> void:
@@ -92,7 +103,7 @@ func _test_health_failure_and_retry(test: SceneTree) -> void:
 	sim.paused = true
 	sim.retry()
 	test.expect(sim.health == 3 and not sim.failed and not sim.paused, "retry restores health, failure, and pause")
-	test.expect(sim.target_alive and not sim.exit_open and not sim.completed, "retry restores mechanism and exit")
+	test.expect(sim.target_alive and sim.anchors_remaining == 2 and not sim.exit_open and not sim.completed, "retry restores both locks and closed exit")
 	test.expect(sim.puck.active and sim.puck.last_returner == "enemy" and sim.bolts.is_empty(), "retry resets projectile and sidearm state")
 
 

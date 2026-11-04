@@ -91,18 +91,18 @@ func _test_serve_finish_and_retry() -> void:
 	expect(rules.serve(), "nonwinning freeze accepts serve")
 	expect(rules.phase == "READY" and rules.rival_score == 1, "serve preserves score and enters READY")
 	rules.start()
-	for index in range(4):
+	for index in range(2):
 		rules.goal("rival")
-		if index < 3:
+		if index < 1:
 			rules.serve()
 			rules.start()
-	expect(rules.rival_score == 5, "first-to-five target reached")
+	expect(rules.rival_score == 3, "first-to-three target reached")
 	expect(rules.phase == "GOAL_FREEZE", "winning goal still resolves through freeze")
 	expect(not rules.serve(), "winning freeze cannot serve")
 	expect(rules.finish(), "winning freeze finishes")
 	expect(rules.phase == "FINISHED", "finish enters FINISHED")
 	expect(not rules.start() and not rules.goal("player") and not rules.pause(), "FINISHED rejects accidental gameplay restart")
-	expect(rules.player_score == 0 and rules.rival_score == 5, "finished match has one winner")
+	expect(rules.player_score == 0 and rules.rival_score == 3, "finished match has one winner")
 	rules.pause()
 	rules.retry()
 	expect(rules.phase == "READY" and not rules.paused, "retry restores initial phase and pause")
@@ -122,11 +122,11 @@ func _test_automatic_authorized_transitions() -> void:
 	expect(rules.phase == "GOAL_FREEZE", "point resolution does not serve early")
 	rules.advance(0.02)
 	expect(rules.phase == "READY", "point resolution authorizes nonwinning serve")
-	for index in range(4):
+	for index in range(2):
 		rules.advance(0.81)
 		rules.goal("player")
 		rules.advance(0.66)
-	expect(rules.phase == "FINISHED" and rules.player_score == 5, "fifth goal automatically finishes after freeze")
+	expect(rules.phase == "FINISHED" and rules.player_score == 3, "third goal automatically finishes after freeze")
 	var frozen_time: float = rules.match_time
 	rules.advance(10.0)
 	expect(rules.match_time == frozen_time, "FINISHED does not advance game time")

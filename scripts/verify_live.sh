@@ -28,7 +28,6 @@ with open(sys.argv[1], encoding="utf-8") as handle:
     report = json.load(handle)
 required = {
     "result": "PASS",
-    "duel_score": [5, 0],
     "pause_checked": True,
     "pause_frozen": True,
     "breach_exit_open": True,
@@ -37,7 +36,16 @@ required = {
 for key, expected in required.items():
     if report.get(key) != expected:
         raise SystemExit(f"live application: FAIL {key}: expected {expected!r}, got {report.get(key)!r}")
-if report.get("player_strikes", 0) < 1:
-    raise SystemExit("live application: FAIL no measured active strike")
-print("live application: PASS (input-only duel, pause, breach, and exit; no forced game state)")
+score = report.get("duel_score", [])
+if len(score) != 2 or score[0] != 3:
+    raise SystemExit(f"live application: FAIL player did not win first-to-three: {score!r}")
+if not 1 <= score[1] <= 2:
+    raise SystemExit(f"live application: FAIL expected a competitive 3-1/3-2 benchmark, got {score!r}")
+if report.get("player_strikes", 0) + report.get("perfect_strikes", 0) < 1:
+    raise SystemExit("live application: FAIL no measured strike or perfect return")
+if report.get("brake_uses", 0) < 1:
+    raise SystemExit("live application: FAIL BRAKE was never activated")
+if report.get("max_rally", 0) < 2:
+    raise SystemExit("live application: FAIL rally escalation was not exercised")
+print("live application: PASS (input-only duel, brake, pause, breach, and exit; no forced game state)")
 PY

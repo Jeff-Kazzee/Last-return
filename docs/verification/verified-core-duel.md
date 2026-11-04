@@ -13,7 +13,7 @@ See `docs/IMPLEMENTATION_PLAN.md` and `formal/README.md` for the pre-implementat
 
 - Command: `scripts/verify_formal.sh` (runs `python3 formal/check_duel_model.py` and `python3 formal/check_duel_model.py --mutate duplicate-goal`).
 - Bounds: scores 0–5, four phases, binary pause and clock/puck/AI tokens; exhaustive reachable-state exploration, 100,000-state safety cap, no depth cutoff.
-- Assumptions: first to five, no win-by-two, goal events represent already validated geometry, automatic timers are authorized explicit events, no continuous physics claim.
+- Assumptions: first to three, no win-by-two, goal events represent already validated geometry, automatic timers are authorized explicit events, no continuous physics claim.
 - Result (working tree before lifecycle implementation): **PASS**. Clean exploration visited **932 states / 8,388 action transitions**; model SHA-256 `92a00ad915f290df93f7d03a15a0b53704741f32fd9bac882cb7ad1e8731b808`; exit 0. The `duplicate-goal` mutation exited 1 at 10 states / 38 transitions with `unpaused LIVE is the only scoring source` and trace `start → goal_player → goal_player` (score 1 became 2 during `GOAL_FREEZE`). `scripts/verify_formal.sh` then exited 0 because the negative control was detected as required.
 
 ## Godot import and runtime bridge
@@ -40,6 +40,10 @@ Finite samples are not proof for all floating-point inputs. The fixed oracle is 
 - Ownership chain: enemy-owned target impact rejected; real active paddle contact changed ownership to player; that returned shot broke the mechanism; target break opened but did not itself complete the exit; entering the open exit completed the room.
 - Additional cases: closed-exit rejection, maximum-speed target sweep, full-state pause, three discrete body hits with invulnerability, failure and complete retry, sidearm armor non-bypass, and identical five-second breach traces.
 - Harness integrity: Godot emitted a GDScript compile error while exiting 0 during development; `scripts/verify_godot.sh` now fails on engine errors as well as nonzero status. No such diagnostics remain in the passing run.
+
+## Intensity/depth revision
+
+The current shipped rule is first-to-three and the rival/breach rules have expanded. See `docs/verification/depth-pass.md` for the later benchmark and tuning evidence. The sections below preserve the earlier vertical-slice verification history; where counts differ, the depth-pass record is current.
 
 ## Final Godot suite and gameplay tuning
 

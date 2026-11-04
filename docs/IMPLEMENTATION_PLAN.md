@@ -7,7 +7,7 @@
 
 ## Observable outcome and preserved behavior
 
-A player can launch the offline project, win or lose a readable first-to-five return duel against a physically constrained rival, pause/resume and retry cleanly, then enter one connected breach and return a sentry projectile into its exposed mechanism to open a reachable exit. Existing design/governance documents and owner-only merge/release gates remain unchanged.
+A player can launch the offline/web project, win or lose a readable first-to-three return duel against a physically constrained adaptive rival, pause/resume and retry cleanly, then enter one connected breach and return sentry projectiles into two exposed locks to open a reachable exit. Rally acceleration, PERFECT timing, focus BRAKE, pressure-wide goals, and bank pylons add tactical depth. Existing design/governance documents and owner-only merge/release gates remain unchanged.
 
 ## Bounded milestones
 

@@ -2,15 +2,17 @@
 
 **Last Return** is a proposed atmospheric 2D arcade escape game set inside **the Interval**, a dreaming dystopian city. Play centers on reading incoming projectiles, moving to intercept them, and **returning** them with purpose: in competitive paddle duels, short action breaches, and elaborate boss encounters.
 
-> **Status:** A playable Godot 4 vertical slice now exists on the `feat/verified-core-duel` review branch: one first-to-five arcade duel and one connected return-combat breach. The broader game remains in development; campaign, boss, save, and trial targets are not implemented.
+> **Status:** A playable Godot 4 arcade release now exists on the `feat/verified-core-duel` review branch: one first-to-three duel with escalating rally speed, timing grades, focus BRAKE, adaptive rival defense, and bank pylons, followed by a two-lock return-combat breach. The broader campaign, bosses, save system, and trial catalog are not implemented.
 
 ## Play the vertical slice
 
 Open `project.godot` in **Godot 4.4.1** and run the project, or run `godot --path .` from a checkout with Godot on `PATH`. No plugins, downloaded assets, accounts, or network connection are required.
 
-1. Press **Enter** at the title. Score five goals before the Runner.
-2. Move into the core to make an ordinary return. Time **Strike** near actual paddle contact for a faster, aimed return.
-3. After winning, press **Enter** to enter the connected breach. Return the sentry's bright core into the armored mechanism, then move into the opened exit.
+1. Press **Enter** at the title. Score three goals before the Runner.
+2. Move into the core to return it. Each exchange accelerates the rally. Strike just before contact for a **PERFECT** return with extra pace.
+3. Successful returns build **FOCUS**. Press **E** to BRAKE the hostile core while keeping full courier movement.
+4. Use the two central pylons as bank surfaces and watch for **PRESSURE WIDE** goals during long rallies.
+5. After winning, press **Enter** to enter the breach. Hit both armored locks with player-returned cores, then enter the opened exit.
 
 | Action | Keyboard / mouse | Conventional gamepad |
 | --- | --- | --- |
@@ -18,6 +20,7 @@ Open `project.godot` in **Godot 4.4.1** and run the project, or run `godot --pat
 | Aim | Mouse or arrow keys | Right stick |
 | Active return | Left mouse | Right trigger |
 | Dash | Space | Left shoulder |
+| Focus brake | E | Right shoulder |
 | Breach sidearm (sentry stun) | Right mouse | Left trigger |
 | Pause / resume | Escape | Menu / Start |
 | Retry | R | Keyboard currently required |
@@ -25,7 +28,7 @@ Open `project.godot` in **Godot 4.4.1** and run the project, or run `godot --pat
 | Collision/AI debug | F3 | — |
 | Reduced effects | F4 | — |
 
-The duel uses a 120 Hz fixed-step simulation, swept projectile contacts, whole-core goal openings, a reaction-delayed physical rival, and complete pause/retry state ownership. The breach reuses the same return math and gives the courier three integrity points. Focus loss and controller disconnect pause play.
+The duel uses a 120 Hz fixed-step simulation, swept projectile contacts, whole-core goal openings, a reaction-delayed physical rival that adapts after conceding, and complete pause/retry state ownership. Rally returns build speed; long rallies widen both goals under pressure; PERFECT timing adds the largest pace boost; and focus can be spent on a short BRAKE. The breach reuses the same return math, requires two distinct lock hits, and gives the courier three integrity points. Focus loss and controller disconnect pause play.
 
 ## Web build
 

@@ -17,7 +17,10 @@ var player: Dictionary = {}
 var puck: Dictionary = {}
 var bolts: Array[Dictionary] = []
 var sentry_position := Vector2(950, 250)
-var target_position := Vector2(1050, 370)
+var anchor_positions: Array[Vector2] = [Vector2(1060, 300), Vector2(1000, 530)]
+var target_position := Vector2(1060, 300)
+var anchor_index := 0
+var anchors_remaining := 2
 var exit_center := Vector2(1130, 565)
 var health := 3
 var target_alive := true
@@ -48,6 +51,9 @@ func reset() -> void:
 	bolts.clear()
 	health = 3
 	target_alive = true
+	anchor_index = 0
+	anchors_remaining = anchor_positions.size()
+	target_position = anchor_positions[0]
 	exit_open = false
 	completed = false
 	failed = false
@@ -80,6 +86,8 @@ func paddle_center(actor: Dictionary) -> Vector2:
 func snapshot() -> Dictionary:
 	return {"player": player.duplicate(true), "puck": puck.duplicate(true),
 		"bolts": bolts.duplicate(true), "health": health, "target_alive": target_alive,
+		"target_position": target_position, "anchor_index": anchor_index,
+		"anchors_remaining": anchors_remaining,
 		"exit_open": exit_open, "completed": completed, "failed": failed, "paused": paused,
 		"invulnerability": invulnerability, "sidearm_cooldown": sidearm_cooldown,
 		"respawn_remaining": respawn_remaining, "sentry_stun": sentry_stun, "elapsed": elapsed}
@@ -223,12 +231,19 @@ func _step_puck(delta: float) -> void:
 				respawn_remaining = 0.8
 			"target":
 				if puck.last_returner == "player":
-					target_alive = false
-					exit_open = true
+					anchors_remaining -= 1
 					puck.active = false
 					puck.velocity = Vector2.ZERO
-					respawn_remaining = 0.0
-					events.append("target_break")
+					if anchors_remaining > 0:
+						anchor_index += 1
+						target_position = anchor_positions[anchor_index]
+						respawn_remaining = 0.55
+						events.append("target_damage")
+					else:
+						target_alive = false
+						exit_open = true
+						respawn_remaining = 0.0
+						events.append("target_break")
 				else:
 					puck.velocity = Physics.reflected(puck.velocity, normal, puck.velocity.length())
 					events.append("armor_reject")

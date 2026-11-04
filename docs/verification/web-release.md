@@ -36,6 +36,7 @@ Do not paste a token into source, screenshots, chat logs, or this repository.
 ## Limits
 
 - Browser testing used Chromium with software WebGL under Xvfb. It is not a GPU performance benchmark.
+- Current gameplay is first-to-three with rally acceleration, PERFECT/ACTIVE/PASSIVE timing, focus BRAKE, bank pylons, pressure-wide goals, adaptive rival speed/reaction/accuracy, and a two-lock breach. The public preview was rerun after these changes.
 - Firefox, Safari, mobile touch controls, audio, and human playtesting remain unverified.
 - The build is still the verified duel + breach slice; it is not the proposed 64-encounter campaign.
 - No analytics, telemetry, leaderboard, login, or cloud save is present.

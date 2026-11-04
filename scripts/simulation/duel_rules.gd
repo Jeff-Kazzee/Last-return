@@ -5,7 +5,8 @@ const READY := "READY"
 const LIVE := "LIVE"
 const GOAL_FREEZE := "GOAL_FREEZE"
 const FINISHED := "FINISHED"
-const WIN_TARGET := 5
+const WIN_TARGET := 3
+var win_target := WIN_TARGET
 const READY_SECONDS := 0.8
 const FREEZE_SECONDS := 0.65
 
@@ -41,9 +42,9 @@ func retry() -> void:
 
 
 func winner() -> String:
-	if player_score == WIN_TARGET:
+	if player_score == win_target:
 		return "player"
-	if rival_score == WIN_TARGET:
+	if rival_score == win_target:
 		return "rival"
 	return "none"
 

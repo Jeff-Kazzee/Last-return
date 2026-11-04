@@ -101,7 +101,7 @@ def check(mutation: str = "") -> dict:
         "actions": len(ACTIONS),
         "state_cap": MAX_STATES,
         "win_target": WIN_TARGET,
-        "bounds": "scores 0..5; four phases; pause and three progress tokens are binary; exhaustive queue, no depth cutoff",
+        "bounds": f"scores 0..{WIN_TARGET}; four phases; pause and three progress tokens are binary; exhaustive queue, no depth cutoff",
     }
 
 

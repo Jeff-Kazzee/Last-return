@@ -31,6 +31,8 @@ func _run() -> void:
 	await _save("duel")
 	game.start_breach()
 	await _save("breach")
+	game.breach.anchors_remaining = 0
+	game.breach.anchor_index = game.breach.anchor_positions.size() - 1
 	game.breach.target_alive = false
 	game.breach.exit_open = true
 	await _save("open-exit")

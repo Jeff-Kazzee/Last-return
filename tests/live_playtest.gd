@@ -10,6 +10,7 @@ var pause_frozen := false
 var pause_checked := false
 var pause_seen_ticks := 0
 var pause_snapshot_tick := -1
+var max_rally_seen := 0
 var captures: Array[String] = []
 var captured := {}
 var output_dir := ProjectSettings.globalize_path("res://artifacts/live")
@@ -54,7 +55,7 @@ func _move(direction: Vector2) -> void:
 
 func _release_controls() -> void:
 	_move(Vector2.ZERO)
-	for action in ["strike", "dash", "fire"]:
+	for action in ["strike", "dash", "technique", "fire"]:
 		Input.action_release(action)
 
 
@@ -74,7 +75,7 @@ func _aim(direction: Vector2) -> void:
 	_strength("aim_down", direction.y if direction.y > 0.0 else 0.0)
 
 
-func _return_input(sim: RefCounted, target: Vector2, home_x: float) -> void:
+func _return_input(sim: RefCounted, target: Vector2, home_x: float, use_brake: bool = true) -> void:
 	var actor: Dictionary = sim.player
 	var aim: Vector2 = (target - actor.position).normalized()
 	_aim(aim)
@@ -86,7 +87,7 @@ func _return_input(sim: RefCounted, target: Vector2, home_x: float) -> void:
 	var direction: Vector2 = (desired - actor.position) / 65.0
 	_move(direction.limit_length(1.0))
 	var paddle: Vector2 = sim.paddle_center(actor)
-	if approaching and sim.puck.position.distance_to(paddle) < 112.0 and actor.strike_cooldown <= 0.0:
+	if approaching and sim.puck.position.distance_to(paddle) < 52.0 and actor.strike_cooldown <= 0.0:
 		Input.action_press("strike")
 	else:
 		Input.action_release("strike")
@@ -94,12 +95,17 @@ func _return_input(sim: RefCounted, target: Vector2, home_x: float) -> void:
 		Input.action_press("dash")
 	else:
 		Input.action_release("dash")
+	if use_brake and sim.brake_energy >= sim.BRAKE_COST and approaching and sim.puck.position.distance_to(actor.position) < 280.0:
+		Input.action_press("technique")
+	else:
+		Input.action_release("technique")
 
 
 func _drive() -> void:
 	if finished:
 		return
 	ticks += 1
+	max_rally_seen = maxi(max_rally_seen, game.duel.rally_hits)
 	if ticks > 21600:
 		_finish(false, "timeout before route completion")
 		return
@@ -160,7 +166,7 @@ func _drive_breach() -> void:
 		var direction: Vector2 = (game.breach.exit_center - game.breach.player.position) / 55.0
 		_move(direction.limit_length(1.0))
 		return
-	_return_input(game.breach, game.breach.target_position, 250.0)
+	_return_input(game.breach, game.breach.target_position, 250.0, false)
 
 
 func _capture(name: String) -> void:
@@ -183,26 +189,34 @@ func _finish(success: bool, reason: String) -> void:
 	_release_controls()
 	var player_strikes := 0
 	var player_returns := 0
+	var perfect_strikes := 0
+	var brake_uses := 0
 	for event in game.duel.events:
 		if event == "strike_player":
 			player_strikes += 1
-		if event in ["strike_player", "return_player"]:
+		if event == "perfect_player":
+			perfect_strikes += 1
+		if event == "brake":
+			brake_uses += 1
+		if event in ["strike_player", "perfect_player", "return_player"]:
 			player_returns += 1
 	var report := {"result": "PASS" if success else "FAIL", "reason": reason,
 		"ticks": ticks, "fixed_step_hz": 120,
 		"duel_score": [game.duel.rules.player_score, game.duel.rules.rival_score],
-		"player_strikes": player_strikes, "player_returns": player_returns,
+		"player_strikes": player_strikes, "perfect_strikes": perfect_strikes,
+		"brake_uses": brake_uses, "player_returns": player_returns,
 		"duel_time": game.duel.rules.match_time, "faults": game.duel.fault_count,
+		"max_rally": max_rally_seen,
 		"pause_checked": pause_checked,
 		"pause_frozen": pause_frozen, "breach_exit_open": game.breach.exit_open,
 		"breach_completed": game.breach.completed, "breach_health": game.breach.health,
 		"breach_time": game.breach.elapsed, "breach_events": game.breach.events.slice(maxi(0, game.breach.events.size() - 30)),
 		"breach_player": game.breach.player, "captures": captures,
-		"driver_version": "live-v3-recovery-actions",
+		"driver_version": "live-v4-focus-brake",
 		"renderer": DisplayServer.get_name(),
 		"state_forcing": "none: only Input actions and scene flow"}
 	var file := FileAccess.open(output_dir.path_join("report.json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify(report, "  "))
 	file.close()
 	print("LIVE PLAYTEST: ", JSON.stringify(report))
-	quit(0 if success and pause_frozen and player_strikes > 0 else 1)
+	quit(0 if success and pause_frozen and player_strikes + perfect_strikes > 0 else 1)

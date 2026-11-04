@@ -15,6 +15,7 @@ func run(test: SceneTree) -> void:
 	_test_rival_constraints(test)
 	_test_stationary_defender(test)
 	_test_player_movement_dash_and_body(test)
+	_test_rally_pylons_precision_and_brake(test)
 
 
 func blank_input() -> Dictionary:
@@ -165,7 +166,7 @@ func _test_determinism_and_held_out_seeds(test: SceneTree) -> void:
 		sim.reset(seed_value)
 		for index in range(2400):
 			sim.step(DT, blank_input())
-			if sim.rules.player_score < 0 or sim.rules.rival_score < 0 or sim.rules.player_score > 5 or sim.rules.rival_score > 5:
+			if sim.rules.player_score < 0 or sim.rules.rival_score < 0 or sim.rules.player_score > 3 or sim.rules.rival_score > 3:
 				all_valid = false
 			if sim.puck.velocity.length() > sim.MAX_SPEED + 0.01:
 				capped = false
@@ -209,7 +210,7 @@ func _test_stationary_defender(test: SceneTree) -> void:
 		if sim.rules.phase == "FINISHED":
 			break
 	test.expect(sim.rules.rival_score > 0, "stationary defender concedes under physical rival pressure")
-	test.expect(sim.rules.player_score < 5, "stationary defender cannot win first-to-five indefinitely")
+	test.expect(sim.rules.player_score < 3, "stationary defender cannot win first-to-three indefinitely")
 
 
 func _test_player_movement_dash_and_body(test: SceneTree) -> void:
@@ -233,3 +234,63 @@ func _test_player_movement_dash_and_body(test: SceneTree) -> void:
 	body.step(0.1, blank_input())
 	test.expect(body.puck.last_returner == "none" and is_equal_approx(body.puck.velocity.length(), 180.0), "duel body block is weak and not a controlled return")
 	test.expect(body.rules.player_score == 0 and body.rules.rival_score == 0, "legal body block does not invent score or damage")
+
+
+func _test_rally_pylons_precision_and_brake(test: SceneTree) -> void:
+	var sim = live_sim()
+	sim.player.position = Vector2(250, 360)
+	sim.player.aim = Vector2.RIGHT
+	set_puck(sim, sim.paddle_center(sim.player) + Vector2(70, 0), Vector2(-600, 0))
+	sim.step(0.1, blank_input())
+	var first_speed: float = sim.puck.velocity.length()
+	set_puck(sim, sim.paddle_center(sim.player) + Vector2(70, 0), Vector2(-first_speed, 0))
+	sim.step(0.1, blank_input())
+	test.expect(sim.rally_hits >= 2 and sim.puck.velocity.length() > first_speed * 1.03, "successive returns escalate rally speed")
+	test.expect(sim.puck.velocity.length() <= sim.MAX_SPEED + 0.001, "rally escalation respects speed cap")
+	sim = live_sim()
+	set_puck(sim, Vector2(560, 260), Vector2(600, 0))
+	sim.step(0.2, blank_input())
+	test.expect(sim.puck.velocity.x < 0.0 and "pylon" in sim.events, "mid-court pylon creates a bankable rebound")
+	sim = live_sim()
+	sim.rally_hits = 8
+	test.expect(sim.goal_bounds().x < sim.GOAL_TOP, "extended rally creates pressure-wide goals")
+	set_puck(sim, Vector2(100, sim.GOAL_TOP - 5), Vector2(-1050, 0))
+	sim.step(0.1, blank_input())
+	test.expect(sim.rules.rival_score == 1, "pressure opening converts an otherwise blocked edge shot")
+
+	var precise = live_sim()
+	precise.player.position = Vector2(250, 360)
+	precise.player.aim = Vector2.RIGHT
+	set_puck(precise, precise.paddle_center(precise.player) + Vector2(30, 0), Vector2(-600, 0))
+	var strike := blank_input()
+	strike.strike = true
+	precise.step(DT, strike)
+	test.expect(precise.last_return_grade == "perfect", "contact in the tight strike window grades PERFECT")
+	var late = live_sim()
+	late.player.position = Vector2(250, 360)
+	late.player.aim = Vector2.RIGHT
+	set_puck(late, late.paddle_center(late.player) + Vector2(95, 0), Vector2(-500, 0))
+	late.step(DT, strike)
+	for index in range(20):
+		late.step(DT, blank_input())
+	test.expect(late.last_return_grade == "active", "an early strike that still connects grades ACTIVE")
+
+	var control = live_sim()
+	var braked = live_sim()
+	for runner in [control, braked]:
+		runner.player.position = Vector2(250, 360)
+		runner.player.aim = Vector2.UP
+		set_puck(runner, Vector2(640, 320), Vector2(400, 0))
+	braked.brake_energy = 70.0
+	var brake_input := blank_input()
+	brake_input.technique = true
+	braked.step(DT, brake_input)
+	control.step(DT, blank_input())
+	braked.step(0.2, blank_input())
+	control.step(0.2, blank_input())
+	test.expect(braked.brake_remaining > 0.0 and braked.brake_energy == 5.0, "E spends focus to activate BRAKE")
+	test.expect(braked.puck.position.x < control.puck.position.x - 20.0, "BRAKE visibly slows the hostile core")
+	var adaptive = live_sim()
+	adaptive.rules.goal("player")
+	adaptive.step(0.7, blank_input())
+	test.expect(adaptive.ai_tier == 1 and adaptive.ai_speed_cap > adaptive.AI_MAX_SPEED and adaptive.ai_reaction_ticks < adaptive.AI_DELAY_TICKS, "rival physically adapts after conceding a goal")

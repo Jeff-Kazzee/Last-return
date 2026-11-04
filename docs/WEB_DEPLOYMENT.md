@@ -84,6 +84,6 @@ Alternative: configure a Cloudflare Pages project to deploy a prebuilt `build/we
 - Mouse and keyboard controls are primary; touch/mobile controls are not implemented yet.
 - No audio assets are present.
 - Progress is not persisted.
-- The current game is still one duel + one breach, not the full 64-encounter campaign.
+- The current game is a first-to-three duel with rally escalation, PERFECT timing, focus BRAKE, bank pylons, adaptive rival play, and a two-lock breach—not the full 64-encounter campaign.
 - Threaded WebAssembly requires cross-origin isolation, which some embed contexts disallow.
 - No Windows export, online leaderboard, telemetry, or runtime AI service is included.

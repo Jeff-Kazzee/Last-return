@@ -2,7 +2,7 @@
 
 ## Scope and assumptions
 
-The model is a finite abstraction of one local, first-to-five duel. It starts in `READY`, unpaused, at 0–0, with the player serving. There is no win-by-two rule. `goal_player` and `goal_rival` represent an already validated whole-core goal crossing; geometry and continuous time are outside this model. Invalid/repeated public events are rejected as self-transitions rather than hidden.
+The model is a finite abstraction of one local, first-to-three duel. It starts in `READY`, unpaused, at 0–0, with the player serving. There is no win-by-two rule. `goal_player` and `goal_rival` represent an already validated whole-core goal crossing; geometry and continuous time are outside this model. Invalid/repeated public events are rejected as self-transitions rather than hidden.
 
 `clock`, `puck`, and `ai` are binary progress tokens. An unpaused `world_tick` toggles `clock`; only `LIVE` toggles actor tokens. These tokens establish pause/freeze ownership in the transition model, not physical correctness. Automatic Godot timers are represented by explicit `start`, `serve`, and `finish` events. A fair scheduler for those events is assumed; liveness is not claimed.
 
@@ -10,7 +10,7 @@ The model is a finite abstraction of one local, first-to-five duel. It starts in
 
 - `phase`: `READY | LIVE | GOAL_FREEZE | FINISHED`.
 - `paused`: boolean, orthogonal to the preserved phase.
-- `player_score`, `rival_score`: integers 0 through 5.
+- `player_score`, `rival_score`: integers 0 through 3.
 - `last_scorer`: `none | player | rival`.
 - `serve_owner`: `player | rival`; the side that conceded receives the next serve.
 - `clock`, `puck`, `ai`: binary abstract progress tokens.

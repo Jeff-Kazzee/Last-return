@@ -65,13 +65,14 @@ func _axis(name: String, axis: JoyAxis, value: float) -> void:
 
 
 func _configure_input() -> void:
-	for pair in [["move_left", KEY_A], ["move_right", KEY_D], ["move_up", KEY_W], ["move_down", KEY_S], ["aim_left", KEY_LEFT], ["aim_right", KEY_RIGHT], ["aim_up", KEY_UP], ["aim_down", KEY_DOWN], ["dash", KEY_SPACE], ["pause", KEY_ESCAPE], ["retry", KEY_R], ["confirm", KEY_ENTER], ["debug", KEY_F3], ["effects", KEY_F4]]:
+	for pair in [["move_left", KEY_A], ["move_right", KEY_D], ["move_up", KEY_W], ["move_down", KEY_S], ["aim_left", KEY_LEFT], ["aim_right", KEY_RIGHT], ["aim_up", KEY_UP], ["aim_down", KEY_DOWN], ["dash", KEY_SPACE], ["technique", KEY_E], ["pause", KEY_ESCAPE], ["retry", KEY_R], ["confirm", KEY_ENTER], ["debug", KEY_F3], ["effects", KEY_F4]]:
 		_key(pair[0], pair[1])
 	_mouse("strike", MOUSE_BUTTON_LEFT)
 	_mouse("fire", MOUSE_BUTTON_RIGHT)
 	_button("dash", JOY_BUTTON_LEFT_SHOULDER)
 	_button("pause", JOY_BUTTON_START)
 	_button("confirm", JOY_BUTTON_A)
+	_button("technique", JOY_BUTTON_RIGHT_SHOULDER)
 	_axis("strike", JOY_AXIS_TRIGGER_RIGHT, 1.0)
 	_axis("fire", JOY_AXIS_TRIGGER_LEFT, 1.0)
 	for pair in [["move_left", JOY_AXIS_LEFT_X, -1.0], ["move_right", JOY_AXIS_LEFT_X, 1.0], ["move_up", JOY_AXIS_LEFT_Y, -1.0], ["move_down", JOY_AXIS_LEFT_Y, 1.0], ["aim_left", JOY_AXIS_RIGHT_X, -1.0], ["aim_right", JOY_AXIS_RIGHT_X, 1.0], ["aim_up", JOY_AXIS_RIGHT_Y, -1.0], ["aim_down", JOY_AXIS_RIGHT_Y, 1.0]]:
@@ -152,7 +153,8 @@ func _read_input(actor: Dictionary) -> Dictionary:
 		aim = Vector2.ZERO
 	return {"move": Input.get_vector("move_left", "move_right", "move_up", "move_down"),
 		"aim": aim, "strike": Input.is_action_just_pressed("strike"),
-		"dash": Input.is_action_just_pressed("dash"), "fire": Input.is_action_pressed("fire")}
+		"dash": Input.is_action_just_pressed("dash"), "technique": Input.is_action_just_pressed("technique"),
+		"fire": Input.is_action_pressed("fire")}
 
 
 func _physics_process(delta: float) -> void:
@@ -228,9 +230,9 @@ func _draw_title() -> void:
 	draw_line(Vector2(520, 320), Vector2(520, 400), IVORY, 12, true)
 	_center("READ THE SHOT.  POSITION.  RETURN WITH PURPOSE.", 450, 20, IVORY)
 	_center("ENTER  —  BEGIN THE FIRST COURT", 508, 23, BRASS)
-	_center("WASD move   •   Mouse / arrows aim   •   Left click strike   •   Space dash", 574, 16, MUTED)
-	_center("Escape pause   •   R retry   •   Gamepad supported", 604, 16, MUTED)
-	_center("One first-to-five duel + one connected return breach", 664, 14, MUTED)
+	_center("WASD move   •   Aim   •   Left click strike   •   Space dash   •   E brake", 574, 16, MUTED)
+	_center("Time the strike for PERFECT pace. Build focus. Break the sentry lock.", 604, 16, MUTED)
+	_center("First to three  /  rally speed  /  perfect returns  /  focus brake  /  two-lock breach", 664, 14, MUTED)
 
 
 func _draw_court() -> void:
@@ -239,14 +241,19 @@ func _draw_court() -> void:
 	draw_rect(Rect2(90, 110, 550, 540), Color(0.12, 0.30, 0.31, 0.15))
 	draw_line(Vector2(90, 110), Vector2(1190, 110), IVORY, 3, true)
 	draw_line(Vector2(90, 650), Vector2(1190, 650), IVORY, 3, true)
+	var bounds: Vector2 = duel.goal_bounds()
 	for x in [90.0, 1190.0]:
-		draw_line(Vector2(x, 110), Vector2(x, 285), IVORY, 4, true)
-		draw_line(Vector2(x, 475), Vector2(x, 650), IVORY, 4, true)
-		for y in [285.0, 475.0]:
+		draw_line(Vector2(x, 110), Vector2(x, bounds.x), IVORY, 4, true)
+		draw_line(Vector2(x, bounds.y), Vector2(x, 650), IVORY, 4, true)
+		for y in [bounds.x, bounds.y]:
 			draw_circle(Vector2(x, y), 12, BRASS)
 	for y in range(125, 640, 28):
 		draw_line(Vector2(640, y), Vector2(640, y + 13), MUTED.darkened(0.35), 2, true)
 	draw_arc(Vector2(640, 380), 72, 0, TAU, 64, MUTED.darkened(0.45), 2, true)
+	for pylon in duel.pylons:
+		draw_circle(pylon, duel.PYLON_RADIUS + 4, BG)
+		draw_arc(pylon, duel.PYLON_RADIUS, 0, TAU, 24, BRASS.darkened(0.15), 3, true)
+		draw_circle(pylon, 4, IVORY.darkened(0.2))
 	_text("YOUR GATE", Vector2(28, 385), 12, TEAL)
 	_text("RIVAL GATE", Vector2(1198, 385), 12, VERMILION)
 
@@ -256,9 +263,30 @@ func _draw_duel() -> void:
 	_text("COURIER", Vector2(385, 62), 15, TEAL)
 	_text("THE RUNNER", Vector2(785, 62), 15, VERMILION)
 	_center(str(duel.rules.player_score) + "  :  " + str(duel.rules.rival_score), 76, 42, IVORY)
+	_text("FOCUS", Vector2(104, 92), 11, MUTED)
+	draw_rect(Rect2(154, 82, 180, 10), BG)
+	var focus_width: float = 180.0 * clampf(duel.brake_energy / 100.0, 0.0, 1.0)
+	draw_rect(Rect2(154, 82, focus_width, 10), BRASS if duel.brake_energy >= duel.BRAKE_COST else MUTED)
+	_text("BRAKE" if duel.brake_energy >= duel.BRAKE_COST else "BUILD", Vector2(342, 92), 11, IVORY if duel.brake_energy >= duel.BRAKE_COST else MUTED)
+	_text("RALLY x" + str(duel.rally_hits) + "   CORE " + str(roundi(duel.puck.velocity.length())), Vector2(1000, 92), 12, BRASS)
+	if duel.rally_hits >= 7:
+		_center("P R E S S U R E   W I D E", 130, 13, VERMILION)
 	_draw_actor(duel.player, true)
 	_draw_actor(duel.rival, false)
 	_draw_puck(duel.puck.position, true)
+	if duel.brake_remaining > 0.0:
+		draw_rect(Rect2(90, 110, 1100, 540), Color(TEAL, 0.055))
+		_center("B R A K E", 200, 22, TEAL)
+	if duel.return_flash > 0.0:
+		var grade := "PASSIVE RETURN"
+		var grade_color := MUTED
+		if duel.last_return_grade == "perfect":
+			grade = "PERFECT RETURN  +PACE"
+			grade_color = BRASS
+		elif duel.last_return_grade == "active":
+			grade = "STRIKE RETURN"
+			grade_color = TEAL
+		_center(grade, 220, 18, grade_color)
 	if debug_view:
 		_draw_duel_debug()
 	match duel.rules.phase:
@@ -270,7 +298,7 @@ func _draw_duel() -> void:
 			draw_rect(Rect2(0, 0, 1280, 720), Color(0.02, 0.04, 0.05, 0.78))
 			if duel.rules.winner() == "player":
 				_center("ROUTE UNSEALED", 300, 40, IVORY)
-				_center("The Runner yields. A signal sentry holds the next room.", 350, 18, MUTED)
+				_center("The Runner yields. Two signal locks hold the next room.", 350, 18, MUTED)
 				_center("ENTER  —  CONNECTED BREACH", 420, 24, BRASS)
 			else:
 				_center("SIGNAL LOST", 300, 40, IVORY)
@@ -278,7 +306,7 @@ func _draw_duel() -> void:
 				_center("R  —  INSTANT REMATCH", 420, 24, BRASS)
 	if duel.rules.paused:
 		_draw_pause()
-	_text("WASD move  •  Aim mouse/arrows  •  Click strike  •  Space dash  •  Esc pause  •  R retry", Vector2(190, 700), 14, MUTED)
+	_text("WASD move  •  Aim  •  Strike  •  Space dash  •  E brake  •  Esc pause  •  R retry", Vector2(240, 700), 14, MUTED)
 
 
 func _draw_actor(actor: Dictionary, is_player: bool) -> void:
@@ -316,7 +344,7 @@ func _draw_duel_debug() -> void:
 		draw_arc(actor.position, 17, 0, TAU, 20, TEAL, 1, true)
 		draw_arc(actor.position + actor.aim * 46.0, 26, 0, TAU, 24, BRASS, 1, true)
 	draw_line(duel.rival.position, duel.ai_target, VERMILION, 1, true)
-	_text("F3  " + duel.rules.phase + "  CORE " + str(snappedf(duel.puck.velocity.length(), 0.1)) + "  CONTACTS " + str(duel.contact_count), Vector2(105, 135), 13, BRASS)
+	_text("F3  " + duel.rules.phase + "  CORE " + str(snappedf(duel.puck.velocity.length(), 0.1)) + "  RALLY " + str(duel.rally_hits) + "  CONTACTS " + str(duel.contact_count), Vector2(105, 135), 13, BRASS)
 
 
 
@@ -331,6 +359,10 @@ func _draw_breach() -> void:
 	_text("INTEGRITY", Vector2(960, 60), 13, MUTED)
 	for index in range(3):
 		draw_rect(Rect2(1050 + index * 34, 43, 24, 18), TEAL if index < breach.health else Color("314247"))
+	_text("LOCKS " + str(breach.anchors_remaining), Vector2(820, 60), 13, BRASS if breach.anchors_remaining > 0 else TEAL)
+	for index in range(breach.anchor_positions.size()):
+		var anchor_color := MUTED if index < breach.anchor_index or not breach.target_alive else BRASS
+		draw_arc(breach.anchor_positions[index], 29, 0, TAU, 20, anchor_color, 2, true)
 	var sentry_color := MUTED if breach.sentry_stun > 0.0 else VERMILION
 	draw_circle(breach.sentry_position, 30, BG)
 	draw_arc(breach.sentry_position, 27, 0, TAU, 6, sentry_color, 5, true)
@@ -342,7 +374,7 @@ func _draw_breach() -> void:
 		draw_arc(breach.target_position, 25, 0, TAU, 32, IVORY, 3, true)
 		draw_line(breach.target_position + Vector2(-13, -13), breach.target_position + Vector2(13, 13), BRASS, 4, true)
 		draw_line(breach.target_position + Vector2(-13, 13), breach.target_position + Vector2(13, -13), BRASS, 4, true)
-		_text("RETURNED CORE ONLY", breach.target_position + Vector2(-85, 72), 12, BRASS)
+		_text("RETURNED CORE ONLY  /  LOCK " + str(breach.anchor_index + 1), breach.target_position + Vector2(-100, 72), 12, BRASS)
 	else:
 		draw_arc(breach.target_position, 34, 0.2, 2.5, 20, MUTED, 3, true)
 		_text("MECHANISM BROKEN", breach.target_position + Vector2(-80, 65), 12, TEAL)
@@ -360,7 +392,7 @@ func _draw_breach() -> void:
 	for bolt in breach.bolts:
 		draw_rect(Rect2(bolt.position - Vector2(3, 3), Vector2(6, 6)), VERMILION)
 	_draw_puck(breach.puck.position, breach.puck.active)
-	_text("Left click RETURN  •  Right click sidearm stuns sentry  •  Return the core into the mechanism", Vector2(235, 700), 14, MUTED)
+	_text("Return the core into BOTH locks  •  Right click stuns sentry  •  Exit when the shutters open", Vector2(265, 700), 14, MUTED)
 	if breach.failed:
 		draw_rect(Rect2(0, 0, 1280, 720), Color(0.02, 0.04, 0.05, 0.8))
 		_center("COURIER SIGNAL LOST", 320, 36, IVORY)

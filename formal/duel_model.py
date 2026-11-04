@@ -1,4 +1,4 @@
-"""Explicit finite abstraction of Last Return's first-to-five duel lifecycle.
+"""Explicit finite abstraction of Last Return's first-to-three duel lifecycle.
 
 This model deliberately excludes continuous movement and collision geometry. The clock,
 puck, and AI fields are two-valued progress tokens used to check transition ownership;
@@ -7,7 +7,7 @@ they are not numeric physics models.
 from dataclasses import dataclass, replace
 from enum import Enum
 
-WIN_TARGET = 5
+WIN_TARGET = 3
 
 
 class Phase(str, Enum):
