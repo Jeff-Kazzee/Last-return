@@ -1,13 +1,14 @@
 # Last Return release gate
 
-**Nothing is released merely because a branch named `prod` exists.** The branch currently holds project documentation only.
+`dev` is the default integration branch. `prod` holds approved production work. The repository has no `main` branch. Short-lived task branches target `dev`, except emergency hotfixes. A playable release requires the evidence below.
 
 Version: __________   Candidate commit SHA: __________   Date: __________
 
 ## Candidate and integrity
 
 - [ ] PR `dev` → `prod` (or documented `hotfix/*` → `prod`) has a clear scope and change summary.
-- [ ] All configured required CI/status checks have passed for the candidate SHA.
+- [ ] `repository-guard` and all other configured required checks passed for the candidate SHA. Record skipped checks separately.
+- [ ] Godot import, GDScript parsing, automated game logic tests, and deterministic physics tests ran for the candidate. Record exact commands, outcomes, and any coverage gaps.
 - [ ] Branch and binary artifacts are reproducible from a recorded Godot version and dependencies.
 - [ ] Dependency, repository secrets, and asset/licensing provenance review completed.
 - [ ] No unresolved blocker or known critical security issue.
@@ -27,7 +28,7 @@ Version: __________   Candidate commit SHA: __________   Date: __________
 
 - [ ] Release notes and user-facing limitations are accurate.
 - [ ] Rollback strategy or previous known-good tag identified.
-- [ ] **Owner explicitly approved promotion.** Agents did not self-approve.
+- [ ] **Owner explicitly approved this candidate SHA.** The owner merges the PR with a merge commit.
 - [ ] After merge, tag **the approved `prod` SHA**, never `dev`.
 - [ ] If emergency hotfix, bring the patch back into `dev` through its own PR.
 
