@@ -1,14 +1,10 @@
 # Last Return release gate
 
-
 `dev` is the default integration branch. `prod` holds approved production work. The repository has no `main` branch. Short-lived task branches target `dev`, except emergency hotfixes. A playable release requires the evidence below.
-
 
 Version: __________   Candidate commit SHA: __________   Date: __________
 
-
 ## Candidate and integrity
-
 
 - [ ] PR `dev` → `prod` (or documented `hotfix/*` → `prod`) has a clear scope and change summary.
 - [ ] `repository-guard` and all other configured required checks passed for the candidate SHA. Record skipped checks separately.
@@ -17,9 +13,7 @@ Version: __________   Candidate commit SHA: __________   Date: __________
 - [ ] Dependency, repository secrets, and asset/licensing provenance review completed.
 - [ ] No unresolved blocker or known critical security issue.
 
-
 ## Playable quality
-
 
 - [ ] Windows build exported and opened on a real Windows environment.
 - [ ] Keyboard/mouse gameplay is responsive; controller smoke test performed if advertised.
@@ -30,9 +24,7 @@ Version: __________   Candidate commit SHA: __________   Date: __________
 - [ ] Visual legibility, audio cues, and reduced-effects accessibility tested at target resolutions.
 - [ ] Worst known frame-time or performance issue documented; no false performance claims.
 
-
 ## Shipping decision
-
 
 - [ ] Release notes and user-facing limitations are accurate.
 - [ ] Rollback strategy or previous known-good tag identified.
@@ -40,6 +32,5 @@ Version: __________   Candidate commit SHA: __________   Date: __________
 - [ ] Record the resulting `prod` merge SHA. Verify the release checks and Windows export against that exact SHA before the owner approves it for tagging.
 - [ ] Tag the approved `prod` merge SHA.
 - [ ] If emergency hotfix, bring the patch back into `dev` through its own PR.
-
 
 Owner decision: __________   Actual test evidence / artifact links: __________
