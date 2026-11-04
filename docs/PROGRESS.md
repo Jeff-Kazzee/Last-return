@@ -34,6 +34,15 @@
 - Added `scripts/verify_all.sh`, `scripts/verify_live.sh`, and a pinned CI proposal at `docs/verification/game-verification.workflow.yml`. The cloud GitHub App rejected a push containing `.github/workflows/game-verification.yml` because it lacks `workflows` permission; the workflow was moved to the documented owner-installation path rather than weakening or bypassing credentials. No branch protection or repository setting was modified.
 - One same-harness independent review was requested but blocked by the reviewer provider usage limit before findings. No skill invocation or multi-provider review is claimed.
 
+## Web release preparation
+
+- Added a pinned Godot 4.4.1 Web export preset, Cloudflare `_headers`, local isolation-header server, web build/deploy scripts, and a Chromium WebGL2 smoke gate.
+- Web export: **PASS**, 41 MB package with WASM, PCK, JavaScript, and Cloudflare headers.
+- Browser gate: **PASS** at 1280×720; Godot 4.4.1 booted, WebGL2 and cross-origin isolation were active, Enter reached a live duel, movement was accepted, Escape reached pause, and title/duel/pause hashes were distinct.
+- Deployed the exact build to a temporary Cloudflare Quick Tunnel for external testing: public HTTP 200, `application/wasm`, COOP/COEP headers, and browser gate **PASS** through the public URL. This is deliberately not described as an account Pages deployment.
+- Permanent Pages deployment is blocked because no Cloudflare credential is exposed to the worker. `scripts/deploy_cloudflare.sh` exits 2 with a clear message unless a scoped `CLOUDFLARE_API_TOKEN` is supplied. No token was requested in chat or committed.
+- Evidence: `docs/verification/web-gate.json`, `docs/verification/captures/web-title.png`, `web-duel.png`, and `web-pause.png`.
+
 ## Known unverified behavior
 
 Physical controller hardware, human mouse-aim play, Windows export and runtime, audio, human comprehension/fun, accessibility testing with users, frame-time/GPU performance, long-session stability, and continuous physics outside the finite test scenarios remain unverified. The formal abstraction does not cover runtime fault recovery or continuous motion. The branch is ready for owner review only; it is not merged or release-approved.
