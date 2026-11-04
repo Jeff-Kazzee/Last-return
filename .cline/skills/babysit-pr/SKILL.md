@@ -46,13 +46,13 @@ pr-wait <pr> [--repo owner/name] [--until ready|green|any-change]
 
 It prints one line per real event. It exits 0 when the `--until` condition is
 met or the PR merges, 1 when it needs you (a required check failed, a review
-bot check failed or was cancelled without a review, conflicts, unresolved
-threads, PR closed), and 2 on bad input.
+bot never reviewed the head (its check failed, was cancelled, or was skipped),
+conflicts, unresolved threads, PR closed), and 2 on bad input.
 
 - `ready` (default): required checks green, Greptile or Macroscope reviewed the
-  head, and no unresolved threads. A review bot check that failed or was
-  cancelled without posting a review does not count as a review, so it blocks
-  `ready` until you rerun it; `--until green` ignores it.
+  head, and no unresolved threads. A review bot check that failed, was
+  cancelled, or was skipped without posting a review does not count as a
+  review, so it blocks `ready` until you rerun it; `--until green` ignores it.
 - `green`: required checks only. Use it when the repo has no Greptile or
   Macroscope.
 - `any-change`: exit on the first event.

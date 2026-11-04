@@ -12,16 +12,17 @@ Progress and errors that do not end the run go to stderr.
   green       required checks passed on the current head (every CI check when
               the base branch requires none)
   ready      green, Greptile or Macroscope reviewed the current head (a review
-              bot check that failed or was cancelled without a review does not
-              count), and no review thread is unresolved (default)
+              bot check that failed, was cancelled, or was skipped without a
+              review does not count), and no review thread is unresolved (default)
   any-change  stop after the first poll that prints an event
 
 Exit codes
   0  the --until condition is met, or the PR merged
-  1  the condition cannot be met without action: a required check failed, a
-     review bot check failed or was cancelled without a review, the branch
-     conflicts with its base, the PR closed, `ready` is blocked by unresolved
-     threads or a BEHIND branch, or GitHub stayed unreachable
+  1  the condition cannot be met without action: a required check failed, no
+     review bot reviewed the head (its check failed, was cancelled, or was
+     skipped), the branch conflicts with its base, the PR closed, `ready` is
+     blocked by unresolved threads or a BEHIND branch, or GitHub stayed
+     unreachable
   2  bad arguments, unknown PR, or another pr-wait already watches this PR
 
 Events
@@ -76,6 +77,9 @@ TRANSIENT = re.compile(
     re.IGNORECASE,
 )
 FAILED = ("fail", "cancel")
+# Buckets that mean the review never happened: the check broke, or it was
+# skipped. A skipped check still "finishes", so it cannot be treated as a review.
+NO_REVIEW = FAILED + ("skipping",)
 # gh pr checks buckets, worst first. Duplicate names (push and pull_request runs
 # of one job) collapse to the worst bucket.
 RANK = {"fail": 4, "cancel": 3, "pending": 2, "pass": 1, "skipping": 0}
@@ -93,7 +97,7 @@ query($owner: String!, $name: String!, $number: Int!) {
         nodes { id url state body commit { oid } author { login __typename } }
       }
       reviewThreads(last: 100) {
-        pageInfo { hasNextPage endCursor }
+        pageInfo { hasPreviousPage startCursor }
         nodes {
           isResolved path line
           comments(first: 100) { nodes { id url body author { login __typename } } }
@@ -106,13 +110,14 @@ query($owner: String!, $name: String!, $number: Int!) {
 
 # Older review-thread pages. Readiness depends on every unresolved thread, so a
 # PR with more than 100 threads must not look resolved just because the newest
-# page holds no open one.
+# page holds no open one. `last` pages walk backwards: `before: startCursor`
+# reaches the older threads.
 THREADS_QUERY = """
 query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
   repository(owner: $owner, name: $name) {
     pullRequest(number: $number) {
-      reviewThreads(last: 100, after: $cursor) {
-        pageInfo { hasNextPage endCursor }
+      reviewThreads(last: 100, before: $cursor) {
+        pageInfo { hasPreviousPage startCursor }
         nodes {
           isResolved path line
           comments(first: 100) { nodes { id url body author { login __typename } } }
@@ -329,14 +334,14 @@ class Watcher:
         return pr
 
     def all_threads(self, pr: Json) -> None:
-        """Append older review-thread pages, so no unresolved thread is missed."""
+        """Prepend older review-thread pages, so no unresolved thread is missed."""
         threads = pr["reviewThreads"]
         page_info = threads.get("pageInfo") or {}
         seen: set[str] = set()
-        while page_info.get("hasNextPage"):
-            cursor = page_info.get("endCursor")
+        while page_info.get("hasPreviousPage"):
+            cursor = page_info.get("startCursor")
             if not cursor or cursor in seen:
-                raise GhError(f"review thread pagination stalled at {cursor}", True)
+                raise GhError(f"review thread pagination stalled at {cursor}", False)
             seen.add(cursor)
             proc = gh([
                 "api", "graphql", "-f", f"query={THREADS_QUERY}",
@@ -344,7 +349,7 @@ class Watcher:
                 "-f", f"cursor={cursor}",
             ])
             page = json.loads(proc.stdout)["data"]["repository"]["pullRequest"]["reviewThreads"]
-            threads["nodes"].extend(page["nodes"])
+            threads["nodes"] = page["nodes"] + threads["nodes"]
             page_info = page.get("pageInfo") or {}
         threads["pageInfo"] = page_info
 
@@ -455,10 +460,10 @@ class Watcher:
                 kind = "new thread" if index == 0 else "thread reply"
                 self.emit(f"c:{comment['id']}", f"{kind} from {login} on {where}: {snippet(comment['body'])} {comment['url']}")
 
-        # Review bots on the current head. A bot with checks is done when they
-        # finish without failing. Otherwise it is done once it reviews the head
-        # commit or its summary names the head. A failed or cancelled check is
-        # not a review, so it blocks `ready` instead of satisfying the gate.
+        # Review bots on the current head. A bot reviewed the head when it has a
+        # passing check, a review on the head commit, or a summary that names the
+        # head. Failed, cancelled, and skipped checks are not reviews, so when
+        # every check has settled and none passed, `ready` is blocked.
         bot_status: dict[str, str] = {}
         reviewed: list[str] = []
         blocked_bots: list[str] = []
@@ -468,12 +473,13 @@ class Watcher:
             own_reviews = [r for r in reviews if bot_name(who(r)[0]) == bot]
             on_head = any((r.get("commit") or {}).get("oid") == head for r in own_reviews)
             evidence = on_head or any(short in s["body"] for s in summaries)
-            failed = [name for name, c in own_checks.items() if c["bucket"] in FAILED]
+            passed = any(c["bucket"] == "pass" for c in own_checks.values())
+            unreviewed = [name for name, c in own_checks.items() if c["bucket"] in NO_REVIEW]
             finished = bool(own_checks) and all(c["bucket"] != "pending" for c in own_checks.values())
-            done = evidence or (finished and not failed)
+            done = evidence or passed
             seen = bool(own_checks or summaries or own_reviews)
-            if failed and finished and not evidence:
-                states = ", ".join(f"{name} {own_checks[name]['bucket']}" for name in failed)
+            if finished and unreviewed and not done:
+                states = ", ".join(f"{name} {own_checks[name]['bucket']}" for name in unreviewed)
                 bot_status[bot] = f"{bot} {states} without a review"
                 if bot in GATING_BOTS:
                     blocked_bots.append(states)
@@ -487,6 +493,7 @@ class Watcher:
             if done:
                 if bot in GATING_BOTS:
                     reviewed.append(bot)
+                failed = [name for name in unreviewed if own_checks[name]["bucket"] in FAILED]
                 detail = "; ".join(filter(None, [
                     next((v for v in map(verdict, (s["body"] for s in summaries)) if v), ""),
                     f"failed: {', '.join(failed)}" if failed else "",
@@ -549,12 +556,12 @@ class Watcher:
                 self.finish(1, [dirty_line])
             if fail_lines:
                 self.finish(1, fail_lines)
-            # A review bot whose check failed or was cancelled on this head never
-            # reviewed it, so `ready` is blocked. Say so instead of reporting a
-            # green that no review backs. Another gating bot that did review the
-            # head still satisfies the gate, so this only applies when none did.
+            # A review bot whose check failed, was cancelled, or was skipped on
+            # this head never reviewed it, so `ready` is blocked. Say so instead
+            # of reporting a green that no review backs. Another gating bot that
+            # did review the head still satisfies the gate.
             if self.until == "ready" and green and blocked_bots and not reviewed:
-                self.finish(1, [f"blocked by a failed review bot on {short}: {'; '.join(blocked_bots)}"])
+                self.finish(1, [f"blocked: no review of {short} from {'; '.join(blocked_bots)}"])
             if green and self.until == "green":
                 self.reported.add(checks_key)
                 self.finish(0, [f"green on {short}: {summary}{self.behind(base, base_oid, head)}"])
