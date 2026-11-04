@@ -1,0 +1,18 @@
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: same-origin
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Cache-Control: no-cache
+
+/*.wasm
+  Content-Type: application/wasm
+  Cache-Control: public, max-age=3600
+
+/*.js
+  Content-Type: text/javascript; charset=utf-8
+
+/*.pck
+  Content-Type: application/octet-stream

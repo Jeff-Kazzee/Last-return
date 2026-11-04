@@ -11,14 +11,17 @@ artifacts/
 test-results/
 
 # Exported builds
+build/
 builds/
 exports/
 *.pck
 *.zip
 
-# Python caches
+# Python/Node caches and local dependencies
 __pycache__/
 *.pyc
+node_modules/
+web/node_modules/
 
 # OS/editor files
 .DS_Store

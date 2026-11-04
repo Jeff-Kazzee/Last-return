@@ -27,6 +27,17 @@ Open `project.godot` in **Godot 4.4.1** and run the project, or run `godot --pat
 
 The duel uses a 120 Hz fixed-step simulation, swept projectile contacts, whole-core goal openings, a reaction-delayed physical rival, and complete pause/retry state ownership. The breach reuses the same return math and gives the courier three integrity points. Focus loss and controller disconnect pause play.
 
+## Web build
+
+```bash
+scripts/build_web.sh                 # Godot 4.4.1 web export into build/web/
+python3 scripts/serve_web.py         # http://127.0.0.1:8080/
+scripts/test_web.sh                  # real WebGL2/Chromium smoke test
+scripts/deploy_cloudflare.sh         # requires a scoped Cloudflare API token
+```
+
+The browser build uses Godot's threaded Web runtime, so Cloudflare Pages must serve COOP/COEP headers from `web/_headers`. The exported game has passed a public Cloudflare Tunnel WebGL2 browser test; a permanent Pages deployment is pending a Cloudflare credential exposed to the deployment environment. See `docs/WEB_DEPLOYMENT.md` for account steps, token scope, production checks, and the current blocker.
+
 ## Reproduce verification
 
 With Godot 4.4.1 on `PATH` (or `GODOT=/absolute/path/to/godot`):
