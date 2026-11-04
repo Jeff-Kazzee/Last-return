@@ -36,3 +36,13 @@ The originally produced PDF, DOCX, and two PNG concept paintings are available f
 ## Licensing
 
 All rights reserved unless the repository owner adds an explicit license. Godot and any third-party dependencies/assets must retain their own required notices. Do not import copyrighted assets or assume AI-generated art is cleared for every downstream use without review.
+
+## Branching and release model
+
+- [`dev`](https://github.com/Jeff-Kazzee/Last-return/tree/dev) is the default branch. Start short-lived task branches here and open reviewed PRs back into `dev`.
+- [`prod`](https://github.com/Jeff-Kazzee/Last-return/tree/prod) holds the approved production baseline. The owner promotes releases through a `dev` to `prod` PR. Emergency `hotfix/*` branches start from `prod` and are reconciled into `dev` after the fix.
+- The repository has no `main` branch.
+
+Agents open PRs and report verification. The owner reviews and merges them. The repository guard checks branch direction and basic hygiene. Game tests and playtests have separate results.
+
+See the [branching policy](docs/BRANCHING.md) and [release checklist](docs/RELEASE_CHECKLIST.md).
