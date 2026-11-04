@@ -551,8 +551,9 @@ class Watcher:
                 self.finish(1, fail_lines)
             # A review bot whose check failed or was cancelled on this head never
             # reviewed it, so `ready` is blocked. Say so instead of reporting a
-            # green that no review backs.
-            if self.until == "ready" and green and blocked_bots:
+            # green that no review backs. Another gating bot that did review the
+            # head still satisfies the gate, so this only applies when none did.
+            if self.until == "ready" and green and blocked_bots and not reviewed:
                 self.finish(1, [f"blocked by a failed review bot on {short}: {'; '.join(blocked_bots)}"])
             if green and self.until == "green":
                 self.reported.add(checks_key)
