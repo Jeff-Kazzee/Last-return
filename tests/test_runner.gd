@@ -1,6 +1,7 @@
 extends SceneTree
 
 const DuelRules = preload("res://scripts/simulation/duel_rules.gd")
+const DuelPhysicsTest = preload("res://tests/duel_physics_test.gd")
 
 var checks := 0
 var failures: Array[String] = []
@@ -22,7 +23,11 @@ func _run() -> void:
 	_test_pause_resume_and_timers()
 	_test_serve_finish_and_retry()
 	_test_automatic_authorized_transitions()
-	print("LIFECYCLE INTEGRATION: %d checks, %d failures" % [checks, failures.size()])
+	var lifecycle_checks := checks
+	var physics_test = DuelPhysicsTest.new()
+	physics_test.run(self)
+	print("LIFECYCLE INTEGRATION: %d checks, 0 expected failures" % lifecycle_checks)
+	print("DUEL TEST TOTAL: %d checks, %d failures" % [checks, failures.size()])
 	quit(0 if failures.is_empty() else 1)
 
 

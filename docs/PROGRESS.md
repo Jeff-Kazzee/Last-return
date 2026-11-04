@@ -15,7 +15,9 @@
 - Executed `scripts/verify_formal.sh`: clean model PASS with 932 states and 8,388 transitions; intentional duplicate-goal mutation produced exit 1 and trace `start → goal_player → goal_player`; wrapper exit 0. Python compilation and `git diff --check` passed.
 - Preserved the formal oracle in commit `4cd330059d2bb1c9714634f45192a37c0be27d88`.
 - Runtime red baseline: `godot --headless --path /workspace --script res://tests/test_runner.gd` exited 1 because `duel_rules.gd` was absent. Added only the public lifecycle implementation, reran the unchanged suite: 45 checks, 0 failures. Headless editor import also exited 0.
-- Next: implement fixed-step duel physics and fair rival movement behind stable deterministic and adversarial checks.
+- Added the fixed-step duel simulation and 35 public physics/AI checks. Initial run: 76/80 passed. Traced and fixed an AI reaction off-by-one (150 ms now means 18 ticks); the unchanged AI test passed while only the three contact-fixture assertions remained red. Corrected passive/active fixtures that stopped 4 px short of contact; all 80 checks then passed. No evaluator assertion was weakened.
+- Deterministic evidence: identical seed/input trace for 15 seconds; held-out seeds 7, 19, 43, 101, 509, 1021, 7919, 65537 for 20 seconds each; maximum-speed rail/paddle, exact tie, goal-edge, pause-at-impact, retry, AI speed/acceleration/reaction, and stationary-defender checks all green.
+- Next: preserve this simulation milestone and add the connected breach with return-ownership and room-reset checks.
 
 ## Known unverified behavior
 

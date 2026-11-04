@@ -26,9 +26,13 @@ See `docs/IMPLEMENTATION_PLAN.md` and `formal/README.md` for the pre-implementat
 
 ## Continuous physics and AI
 
-Fixed seed set and held-out scenarios will be recorded with exact outcomes, including all failures. Finite samples will not be described as proof for all floating-point inputs.
+Finite samples are not proof for all floating-point inputs. The fixed oracle is `tests/duel_physics_test.gd`, executed through the Godot test command above.
 
-- Result: **NOT RUN — implementation pending**.
+- Result at the duel simulation milestone: **PASS — 80 total checks, 0 failures** (45 lifecycle + 35 duel physics/AI).
+- Deterministic workload: two independent simulations, seed 90210, identical blank inputs, 1,800 ticks at 1/120 s, snapshots compared every 30 ticks: identical.
+- Held-out workload: seeds 7, 19, 43, 101, 509, 1021, 7919, 65537; 2,400 ticks each at 1/120 s; score bounds and speed cap held in every sampled tick.
+- Adversarial cases: analytic sweep vs naive end-overlap negative control; maximum-speed (1,050 units/s) top rail and paddle crossing; exact rail/paddle tie; active aim/pace cap; both goal attributions; post graze and closed side rail; duplicate crossing; pause immediately before impact; retry; AI displacement/acceleration/reaction; stationary defender for up to 120 simulated seconds.
+- Red/green record: initial implementation 76/80. AI 18-tick off-by-one fixed and unchanged test passed. Three remaining assertions traced to passive/active fixtures ending 4 px before paddle contact; starting distance corrected for both without changing assertions. Final unchanged behavior suite 80/80.
 
 ## Real application and visual checks
 
