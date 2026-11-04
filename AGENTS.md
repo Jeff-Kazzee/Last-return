@@ -17,3 +17,7 @@ This repository is a **game under development**, not a completed game. Read `doc
 - Commit small coherent units; document observed commands/results and unverified GUI behavior in `docs/PROGRESS.md`.
 - Test core physical invariants, goal attribution, reset/pause semantics, and rival movement before polishing or expanding.
 - If a tool cannot verify a claim, state that; do not fabricate screenshots, tests, timings, or benchmarks.
+
+## Branches and release flow
+
+Read `docs/BRANCHING.md` and `docs/RELEASE_CHECKLIST.md`. **`dev` is the active integration branch; `prod` is the finished, owner-approved release branch; `main` is a preserved bootstrap baseline.** Never treat `main` as the active development base. For coding work: branch from `dev` using `feat/*`, `fix/*`, `chore/*`, `test/*`, `docs/*`, `art/*`, or `spike/*`; open PRs targeting `dev`. Production releases use owner-reviewed `dev` → `prod` PRs, with `hotfix/*` branched from `prod` only for urgent fixes. Agents must not merge their own PRs, even when checks pass. Repository rulesets may not yet be configured: written policy still applies. Never assume a branch named `prod` contains a playable release.

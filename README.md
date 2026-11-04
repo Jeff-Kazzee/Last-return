@@ -36,3 +36,12 @@ The originally produced PDF, DOCX, and two PNG concept paintings are available f
 ## Licensing
 
 All rights reserved unless the repository owner adds an explicit license. Godot and any third-party dependencies/assets must retain their own required notices. Do not import copyrighted assets or assume AI-generated art is cleared for every downstream use without review.
+
+## Branching and release model
+
+- [`dev`](https://github.com/Jeff-Kazzee/Last-return/tree/dev) — active integration branch for next build; task branches merge here by reviewed PR.
+- [`prod`](https://github.com/Jeff-Kazzee/Last-return/tree/prod) — approved release branch; **currently a documentation baseline, not a playable shipped game**.
+- `main` — preserved bootstrap branch; do not start new game work there.
+- Feature/fix/chore/test/docs/art/spike branches start from `dev`; urgent `hotfix/*` branches start from `prod`.
+
+See [branch and agent policy](docs/BRANCHING.md) and [release checklist](docs/RELEASE_CHECKLIST.md). **Agents open PRs but do not merge them**. GitHub rulesets/default branch must be configured separately by the owner; repository text does not mechanically enforce them.
