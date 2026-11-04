@@ -11,7 +11,7 @@
 - Public HTML identifies **LLM Arcade · Zero human-written code** and an opening-soon landing app.
 - The production JavaScript references routes including `/games`, `/game/`, `/assets/games/`, `/playtest`, and `/most-played`.
 - The client is Supabase-backed. The public client configuration uses the Supabase project host `afcqhievsmnepxopetkt.supabase.co`.
-- The public GitHub API has **no accessible organization named `llmarcade`** at the time of discovery. A search found only an unrelated `lebrick07/LLMArcade` repository.
+- The actual organization is **`LLM-Arcade`** (`https://github.com/LLM-Arcade`), created 2026-11-04. It currently exposes zero public repositories.
 - No source repository, Vercel project, DNS account, Supabase dashboard, or LLM Arcade platform API contract is exposed to this coding environment.
 
 ## Access currently available to this worker
@@ -19,7 +19,8 @@
 | Capability | Current status |
 | --- | --- |
 | GitHub repository | Only `Jeff-Kazzee/Last-return`; branch push and PR creation work |
-| GitHub organization `llmarcade` | Not accessible; API returns 404 |
+| GitHub organization `LLM-Arcade` | Visible publicly, but not installed/accessible to this App; 0 public repositories |
+| Repository transfer / organization administration | Not accessible. `cline-cloud` lacks repository administration and organization permissions. |
 | GitHub settings, secrets, branch protections | Not accessible |
 | GitHub workflow-file creation | Denied by GitHub App permission |
 | Cloudflare account | Not authenticated; no API token or connector visible |
@@ -29,6 +30,17 @@
 | Godot, Node, Chromium, Xvfb | Available locally in the worker |
 
 ## Required integration choices
+
+### Required GitHub installation step
+
+The owner must install the Cline Cloud GitHub App on `LLM-Arcade` and grant access to the intended repository:
+
+1. Open https://github.com/apps/cline-cloud/installations/new.
+2. Select **LLM-Arcade**.
+3. Grant access to the existing LLM Arcade site repository and/or the new Last Return repository.
+4. Reply with the exact repository slug.
+
+A repository transfer itself is owner-only: GitHub Settings → General → Danger Zone → Transfer, with `LLM-Arcade` as the destination. This worker cannot perform that transfer with the current App installation.
 
 ### Preferred: game inside the existing LLM Arcade site
 
