@@ -46,3 +46,5 @@ All rights reserved unless the repository owner adds an explicit license. Godot 
 Agents open PRs and report verification. The owner reviews and merges them. The repository guard checks branch direction and basic hygiene. Game tests and playtests have separate results.
 
 See the [branching policy](docs/BRANCHING.md) and [release checklist](docs/RELEASE_CHECKLIST.md).
+
+<!-- Temporary repository guard probe. Close this PR without merging. -->
