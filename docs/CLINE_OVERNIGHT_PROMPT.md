@@ -95,3 +95,9 @@ Update `docs/PROGRESS.md` after each milestone with time, actions, command evide
 **Stop criterion:** A verified, playable duel + short connected breach is the win. If you cannot achieve both within the available work session, deliver the best working smaller slice with honest evidence. Do not pad the repo with 3,072 fake levels, fake achievements, or unused art. A defensible prototype is far more useful than a sprawling broken one.
 
 Start by inspecting the actual repository and preparing a short implementation plan. Then execute as far as tool access and time allow without asking optional questions.
+
+## Mandatory Cline skills and verification addendum
+
+**Read and follow [`CLINE_VERIFIED_LAUNCH.md`](CLINE_VERIFIED_LAUNCH.md) before starting an overnight build.** It now defines the cloud skill setup, skill availability detection, Theo T-Stack integration, the supplied empirical runbook, and game-specific formal modelling/testing. Relevant sources are [`SKILL_BOOTSTRAP.md`](SKILL_BOOTSTRAP.md), [`VERIFICATION_PROTOCOL.md`](VERIFICATION_PROTOCOL.md), the project `.cline/skills/last-return-verification/SKILL.md`, and `docs/references/`.
+
+Implementation work is not complete merely when the Godot project imports. For scoring/pause/retry, write the finite transition-state model, run a checker against its invariant properties (with intentional mutant sensitivity test), connect the model actions to real Godot integration tests, and record limits. For physics, add adversarial stress tests and manual/GUI checks when available. If the cloud cannot verify visual playability or cross-provider review, report NOT RUN. Do not use T-Stack `full-send` merge powers; owner approval is required for any PR merge.
