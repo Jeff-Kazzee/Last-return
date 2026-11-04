@@ -7,7 +7,7 @@ This checks PR naming/direction, not GitHub protection settings.
 import re
 import sys
 
-TASK_TYPES = {"feat", "fix", "chore", "test", "docs", "art", "spike", "agent", "hotfix"}
+TASK_TYPES = {"feat", "fix", "chore", "test", "docs", "art", "refactor", "perf", "spike"}
 SLUG = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 
 def allowed(head: str, base: str) -> tuple[bool, str]:
@@ -21,7 +21,7 @@ def allowed(head: str, base: str) -> tuple[bool, str]:
         prefix, sep, slug = head.partition("/")
         if sep and prefix in TASK_TYPES and SLUG.fullmatch(slug):
             return True, "Task PR into dev"
-        return False, "PRs into dev must use a supported task/* branch or prod hotfix sync"
+        return False, "PRs into dev must use a supported task branch or prod hotfix sync"
     return False, f"PR base {base!r} is not a supported integration or release branch"
 
 def main() -> int:

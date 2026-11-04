@@ -39,9 +39,10 @@ All rights reserved unless the repository owner adds an explicit license. Godot 
 
 ## Branching and release model
 
-- [`dev`](https://github.com/Jeff-Kazzee/Last-return/tree/dev) — active integration branch for next build; task branches merge here by reviewed PR.
-- [`prod`](https://github.com/Jeff-Kazzee/Last-return/tree/prod) — approved release branch; **currently a documentation baseline, not a playable shipped game**.
-- `main` — preserved bootstrap branch; do not start new game work there.
-- Feature/fix/chore/test/docs/art/spike branches start from `dev`; urgent `hotfix/*` branches start from `prod`.
+- [`dev`](https://github.com/Jeff-Kazzee/Last-return/tree/dev) is the default branch. Start short-lived task branches here and open reviewed PRs back into `dev`.
+- [`prod`](https://github.com/Jeff-Kazzee/Last-return/tree/prod) holds the approved production baseline. The owner promotes releases through a `dev` to `prod` PR. Emergency `hotfix/*` branches start from `prod` and are reconciled into `dev` after the fix.
+- The repository has no `main` branch.
 
-See [branch and agent policy](docs/BRANCHING.md) and [release checklist](docs/RELEASE_CHECKLIST.md). **Agents open PRs but do not merge them**. GitHub rulesets/default branch must be configured separately by the owner; repository text does not mechanically enforce them.
+Agents open PRs and report verification. The owner reviews and merges them. The repository guard checks branch direction and basic hygiene. Game tests and playtests have separate results.
+
+See the [branching policy](docs/BRANCHING.md) and [release checklist](docs/RELEASE_CHECKLIST.md).
