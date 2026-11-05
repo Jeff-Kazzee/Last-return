@@ -4,7 +4,7 @@
 **Platform:** https://www.llmarcade.fun
 **Organization repo:** https://github.com/LLM-Arcade/llm-arcade
 **Integration branch:** `feature/last-return-game` (from `dev`)
-**Local integration commit:** `624fa2624de3abc7742fd0cafe5af8152ea55ab3`
+**Local integration commit:** `bab1e60043ed2f1d4dabcb26e150d1ee4a181ae5`
 
 ## Implemented integration
 
@@ -36,7 +36,7 @@
 
 - The org repository is publicly readable to this worker, and local CI/browser tests pass.
 - `git push` to `LLM-Arcade/llm-arcade` is rejected with HTTP 403 by the active `cline-cloud[bot]` installation token. The live installation endpoint still lists only `Jeff-Kazzee/Last-return`.
-- The integration commit therefore remains local at `624fa2624de3abc7742fd0cafe5af8152ea55ab3`; a 9.3 MB git bundle and a 15 MB patch were generated under `artifacts/` as recovery artifacts.
+- The integration commit therefore remains local at `bab1e60043ed2f1d4dabcb26e150d1ee4a181ae5`; a 9.3 MB git bundle and a 15 MB patch were generated under `artifacts/` as recovery artifacts.
 - To publish it, start a Cline task from `LLM-Arcade/llm-arcade` after the organization installation has granted that specific repository, or push the bundle from an owner-authenticated clone:
   ```bash
   git fetch /path/to/llm-arcade-last-return.bundle feature/last-return-game
