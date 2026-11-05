@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "state": {
+    "title": "Last Return",
+    "webgl2": true,
+    "isolated": true,
+    "canvas": [
+      [
+        1280,
+        720
+      ]
+    ]
+  },
+  "hashes": {
+    "title": "09d2bf4d32068340c4e879dae812b1da33091e92adc51939ebf2489afc5d78c6",
+    "duel": "de9cfe0fa11ed947cd60c438cd0f5352edff0a4554604166cf8c67e57deff30c",
+    "pause": "568ba28a32c943e346521d57ec8cd260845ee6ad90bd48e8b1685a737f9cecbd"
+  },
+  "failures": [],
+  "logs": [
+    "log:Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org",
+    "log:OpenGL API OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)) - Compatibility - Using Device: WebKit - WebKit WebGL",
+    "warning:[.WebGL-0x290c0fcffc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "warning:[.WebGL-0x290c0fcffc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "warning:[.WebGL-0x290c0fcffc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "warning:[.WebGL-0x290c0fcffc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  ]
+}

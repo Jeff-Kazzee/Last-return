@@ -1,0 +1,29 @@
+# Godot generated data
+.godot/
+*.tmp
+
+# Local tools and reference inspection (not runtime dependencies)
+.tools/
+.reference/
+
+# Verification and capture output
+artifacts/
+test-results/
+
+# Exported builds
+build/
+builds/
+exports/
+*.pck
+*.zip
+
+# Python/Node caches and local dependencies
+__pycache__/
+*.pyc
+node_modules/
+web/node_modules/
+.pnpm-store/
+
+# OS/editor files
+.DS_Store
+Thumbs.db

@@ -2,7 +2,57 @@
 
 **Last Return** is a proposed atmospheric 2D arcade escape game set inside **the Interval**, a dreaming dystopian city. Play centers on reading incoming projectiles, moving to intercept them, and **returning** them with purpose: in competitive paddle duels, short action breaches, and elaborate boss encounters.
 
-> **Status:** Design and pre-production. No playable game has been built or verified yet. The name and technical/content targets are provisional.
+> **Status:** A playable Godot 4 arcade release now exists on the `feat/verified-core-duel` review branch: one first-to-three duel with escalating rally speed, timing grades, focus BRAKE, adaptive rival defense, and bank pylons, followed by a two-lock return-combat breach. The broader campaign, bosses, save system, and trial catalog are not implemented.
+
+## Play the vertical slice
+
+Open `project.godot` in **Godot 4.4.1** and run the project, or run `godot --path .` from a checkout with Godot on `PATH`. No plugins, downloaded assets, accounts, or network connection are required.
+
+1. Press **Enter** at the title. Score three goals before the Runner.
+2. Move into the core to return it. Each exchange accelerates the rally. Strike just before contact for a **PERFECT** return with extra pace.
+3. Successful returns build **FOCUS**. Press **E** to BRAKE the hostile core while keeping full courier movement.
+4. Use the two central pylons as bank surfaces and watch for **PRESSURE WIDE** goals during long rallies.
+5. After winning, press **Enter** to enter the breach. Hit both armored locks with player-returned cores, then enter the opened exit.
+
+| Action | Keyboard / mouse | Conventional gamepad |
+| --- | --- | --- |
+| Move | WASD | Left stick |
+| Aim | Mouse or arrow keys | Right stick |
+| Active return | Left mouse | Right trigger |
+| Dash | Space | Left shoulder |
+| Focus brake | E | Right shoulder |
+| Breach sidearm (sentry stun) | Right mouse | Left trigger |
+| Pause / resume | Escape | Menu / Start |
+| Retry | R | Keyboard currently required |
+| Confirm / enter next room | Enter | A / Cross |
+| Collision/AI debug | F3 | — |
+| Reduced effects | F4 | — |
+
+The duel uses a 120 Hz fixed-step simulation, swept projectile contacts, whole-core goal openings, a reaction-delayed physical rival that adapts after conceding, and complete pause/retry state ownership. Rally returns build speed; long rallies widen both goals under pressure; PERFECT timing adds the largest pace boost; and focus can be spent on a short BRAKE. The breach reuses the same return math, requires two distinct lock hits, and gives the courier three integrity points. Focus loss and controller disconnect pause play.
+
+## Web build
+
+```bash
+scripts/build_web.sh                 # Godot 4.4.1 web export into build/web/
+python3 scripts/serve_web.py         # http://127.0.0.1:8080/
+scripts/test_web.sh                  # real WebGL2/Chromium smoke test
+scripts/deploy_cloudflare.sh         # requires a scoped Cloudflare API token
+```
+
+The browser build uses Godot's **non-threaded** Web runtime so it also works inside an opaque-origin iframe. Static hosts must allow CORS for public WASM/PCK assets. The cabinet is integrated into `LLM-Arcade/llm-arcade`; see `docs/LLMARCADE_INTEGRATION.md`. See `docs/WEB_DEPLOYMENT.md` for standalone hosting, security headers, and deployment checks.
+
+## Reproduce verification
+
+With Godot 4.4.1 on `PATH` (or `GODOT=/absolute/path/to/godot`):
+
+```bash
+scripts/verify_formal.sh   # exhaustive discrete model + intentional invalid transition
+scripts/verify_godot.sh    # import diagnostics + lifecycle/physics/breach/scene tests
+scripts/verify_live.sh     # real main scene driven only through public Input actions
+scripts/verify_all.sh      # all three gates
+```
+
+See `docs/verification/verified-core-duel.md` for exact counts, seeds, formal bounds, GUI evidence, and limitations. A headless run is not a human playtest. Windows export/runtime, physical controller hardware, long-session balance, accessibility with users, and human judgments of fun remain unverified.
 
 ## Start here
 

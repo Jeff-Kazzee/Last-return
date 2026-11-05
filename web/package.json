@@ -1,0 +1,12 @@
+{
+  "name": "last-return-web-check",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Browser smoke verification for the Last Return web export",
+  "scripts": {
+    "test": "node ../tests/web_smoke.js"
+  },
+  "devDependencies": {
+    "playwright-core": "1.55.1"
+  }
+}
