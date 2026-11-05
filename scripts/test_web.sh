@@ -33,4 +33,6 @@ export LIBGL_ALWAYS_SOFTWARE=1
 export LAST_RETURN_WEB_URL="http://127.0.0.1:$PORT/"
 export LAST_RETURN_WEB_ARTIFACTS="$ARTIFACTS"
 NODE_PATH="$ROOT/web/node_modules" node "$ROOT/tests/web_smoke.js"
-echo "WEB BROWSER PASS: title, duel, pause, WebGL2, cross-origin isolation"
+cp "$ROOT/tests/fixtures/iframe_test.html" "$ROOT/build/web/iframe-test.html"
+NODE_PATH="$ROOT/web/node_modules" node "$ROOT/tests/web_iframe_smoke.js"
+echo "WEB BROWSER PASS: direct and opaque-origin iframe, title, duel, pause"

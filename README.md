@@ -39,7 +39,7 @@ scripts/test_web.sh                  # real WebGL2/Chromium smoke test
 scripts/deploy_cloudflare.sh         # requires a scoped Cloudflare API token
 ```
 
-The browser build uses Godot's threaded Web runtime, so Cloudflare Pages must serve COOP/COEP headers from `web/_headers`. The exported game has passed a public Cloudflare Tunnel WebGL2 browser test; a permanent Pages deployment is pending a Cloudflare credential exposed to the deployment environment. See `docs/WEB_DEPLOYMENT.md` for account steps, token scope, production checks, and the current blocker.
+The browser build uses Godot's **non-threaded** Web runtime so it also works inside an opaque-origin iframe. Static hosts must allow CORS for public WASM/PCK assets. The cabinet is integrated into `LLM-Arcade/llm-arcade`; see `docs/LLMARCADE_INTEGRATION.md`. See `docs/WEB_DEPLOYMENT.md` for standalone hosting, security headers, and deployment checks.
 
 ## Reproduce verification
 

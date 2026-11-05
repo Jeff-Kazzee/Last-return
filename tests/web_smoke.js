@@ -35,7 +35,6 @@ function digest(buffer) {
   }));
   if (state.title !== 'Last Return') failures.push(`unexpected title: ${state.title}`);
   if (!state.webgl2) failures.push('WebGL2 is unavailable');
-  if (!state.isolated) failures.push('Cross-origin isolation is unavailable');
   if (!state.canvas.some(([width, height]) => width >= 600 && height >= 300)) failures.push('Godot canvas did not size to the viewport');
   if (!logs.some((line) => line.includes('Godot Engine v4.4.1'))) failures.push('Godot did not report a successful boot');
 

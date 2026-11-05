@@ -22,6 +22,7 @@ __pycache__/
 *.pyc
 node_modules/
 web/node_modules/
+.pnpm-store/
 
 # OS/editor files
 .DS_Store

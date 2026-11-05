@@ -57,3 +57,11 @@
 ## Known unverified behavior
 
 Physical controller hardware, human mouse-aim play, Windows export and runtime, audio, human comprehension/fun, accessibility testing with users, frame-time/GPU performance, long-session stability, and continuous physics outside the finite test scenarios remain unverified. The formal abstraction does not cover runtime fault recovery or continuous motion. The branch is ready for owner review only; it is not merged or release-approved.
+
+## LLM Arcade cabinet integration
+
+- Verified the correct GitHub organization/repository: `LLM-Arcade/llm-arcade`, working branch `feature/last-return-game` from `dev`.
+- Integrated the game into the platform's Track-A iframe architecture with a non-threaded Godot export, an isolated score/achievement bridge, catalog metadata art, seven seeded achievements, and an idempotent seed/publish SQL pair.
+- Added a platform-side integrity harness and ran `pnpm run ci`: **PASS**, including lint, TypeScript, production Vite build, all existing game harnesses, safe-next, and the new Last Return cabinet contract.
+- Browser-tested the real `/dev/last-return` shell in Chromium: iframe mounted, `ARCADE_READY` was received, Enter reached a live duel, and the wrapper forwarded synthetic SCORE/achievement messages.
+- Integration commit exists locally at `624fa2624de3abc7742fd0cafe5af8152ea55ab3`. Push to the org was rejected (HTTP 403) because this task's installed GitHub token still lists only `Jeff-Kazzee/Last-return`; the ready commit, patch, and bundle are preserved.

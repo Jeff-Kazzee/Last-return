@@ -21,12 +21,23 @@ var debug_view := false
 var reduced_effects := false
 var trail: Array[Vector2] = []
 var font: Font
+var arcade_score := 0
+var arcade_score_sent := false
+var arcade_achievements: Dictionary = {}
+var seen_duel_events := 0
+var seen_breach_events := 0
+var longest_rally := 0
+var perfect_returns := 0
+var brake_uses := 0
+var duel_bonus_awarded := false
 
 
 func _ready() -> void:
 	font = ThemeDB.fallback_font
 	_configure_input()
 	Input.joy_connection_changed.connect(_on_joy_connection_changed)
+	if OS.has_feature("web"):
+		_post_arcade({"type": "ARCADE_READY"})
 	queue_redraw()
 
 
@@ -85,6 +96,15 @@ func start_duel() -> void:
 	mode = "DUEL"
 	mouse_aim = false
 	trail.clear()
+	arcade_score = 0
+	arcade_score_sent = false
+	arcade_achievements.clear()
+	seen_duel_events = 0
+	seen_breach_events = 0
+	longest_rally = 0
+	perfect_returns = 0
+	brake_uses = 0
+	duel_bonus_awarded = false
 
 
 func start_breach() -> void:
@@ -161,16 +181,104 @@ func _physics_process(delta: float) -> void:
 	if mode == "DUEL":
 		duel.step(delta, _read_input(duel.player))
 		_record_trail(duel.puck.position, duel.rules.phase == DuelRules.LIVE)
+		_sync_arcade_duel()
+		if duel.rules.phase == DuelRules.FINISHED and duel.rules.winner() == "rival":
+			_send_arcade_score("duel_lost")
 	elif mode == "BREACH":
 		breach.step(delta, _read_input(breach.player))
 		_record_trail(breach.puck.position, breach.puck.active)
+		_sync_arcade_breach()
 		if breach.completed:
 			mode = "ESCAPED"
 			trail.clear()
+			_send_arcade_score("route_open")
+		elif breach.failed:
+			_send_arcade_score("breach_failed")
 
 
 func _process(_delta: float) -> void:
 	queue_redraw()
+
+
+func _post_arcade(payload: Dictionary) -> void:
+	if not OS.has_feature("web"):
+		return
+	var js := "try{window.parent.postMessage(%s,'*')}catch(e){}" % JSON.stringify(payload)
+	JavaScriptBridge.eval(js, true)
+
+
+func _fire_arcade_achievement(id: String) -> void:
+	if arcade_achievements.has(id):
+		return
+	arcade_achievements[id] = true
+	_post_arcade({"type": "ARCADE_ACHIEVEMENT", "id": id})
+
+
+func _sync_arcade_duel() -> void:
+	longest_rally = maxi(longest_rally, duel.rally_hits)
+	while seen_duel_events < duel.events.size():
+		var event: String = duel.events[seen_duel_events]
+		seen_duel_events += 1
+		match event:
+			"return_player":
+				arcade_score += 10
+				_fire_arcade_achievement("first-return")
+			"strike_player":
+				arcade_score += 50
+				_fire_arcade_achievement("first-return")
+			"perfect_player":
+				arcade_score += 150
+				perfect_returns += 1
+				_fire_arcade_achievement("first-return")
+				_fire_arcade_achievement("perfect-return")
+			"brake":
+				arcade_score += 5
+				brake_uses += 1
+				_fire_arcade_achievement("focus-brake")
+			"goal_player":
+				arcade_score += 1000
+		if duel.rally_hits >= 7:
+			_fire_arcade_achievement("pressure-wide")
+	if duel.rules.phase == DuelRules.FINISHED and duel.rules.winner() == "player" and not duel_bonus_awarded:
+		duel_bonus_awarded = true
+		arcade_score += 2000
+		_fire_arcade_achievement("route-unsealed")
+
+
+func _sync_arcade_breach() -> void:
+	while seen_breach_events < breach.events.size():
+		var event: String = breach.events[seen_breach_events]
+		seen_breach_events += 1
+		match event:
+			"target_damage":
+				arcade_score += 2500
+			"target_break":
+				arcade_score += 2500
+				_fire_arcade_achievement("two-locks")
+			"breach_complete":
+				arcade_score += 5000 + breach.health * 500
+				_fire_arcade_achievement("route-open")
+
+
+func _send_arcade_score(reason: String) -> void:
+	if arcade_score_sent or not OS.has_feature("web"):
+		return
+	arcade_score_sent = true
+	var final_score := clampi(arcade_score, 0, 25000)
+	_post_arcade({
+		"type": "ARCADE_SCORE",
+		"score": final_score,
+		"stats": {
+			"goals": duel.rules.player_score,
+			"rival_goals": duel.rules.rival_score,
+			"perfect_returns": perfect_returns,
+			"brakes": brake_uses,
+			"longest_rally": longest_rally,
+			"locks_broken": breach.anchor_positions.size() - breach.anchors_remaining,
+			"health": breach.health,
+			"result": reason,
+		},
+	})
 
 
 func _record_trail(position: Vector2, active: bool) -> void:

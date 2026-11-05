@@ -1,18 +1,18 @@
 # Web release verification
 
-**Branch:** `feat/verified-core-duel`  
-**Godot:** 4.4.1 stable (`49a5bc7b6`), Compatibility renderer, threaded Web template  
-**Build:** `scripts/build_web.sh`  
+**Branch:** `feat/verified-core-duel`
+**Godot:** 4.4.1 stable (`49a5bc7b6`), Compatibility renderer, non-threaded Web template
+**Build:** `scripts/build_web.sh`
 **Browser gate:** `scripts/test_web.sh`
 
 ## Results
 
 - Web export: **PASS**; `index.html`, JavaScript, 40 MB WebAssembly, PCK, and Cloudflare `_headers` were produced.
-- Local browser: **PASS** with WebGL2 and `crossOriginIsolated=true`.
+- Local direct page: **PASS** with WebGL2. Cross-origin isolation is intentionally not required.
 - The canvas reached 1280×720. Enter reached the live duel, movement input was delivered, and Escape reached pause.
 - Title, duel, and pause screenshots had three distinct SHA-256 hashes.
 - No page errors or failed requests were recorded.
-- The same browser gate was run against a temporary HTTPS Cloudflare Quick Tunnel. Public requests returned HTTP 200 and `application/wasm`; COOP/COEP headers were present; the game booted, entered a duel, moved, and paused.
+- The same direct browser gate was run against a temporary HTTPS Cloudflare Quick Tunnel before the platform integration. Public requests returned HTTP 200 and `application/wasm`; the game booted, entered a duel, moved, and paused.
 - Evidence: `docs/verification/web-gate.json`, `captures/web-title.png`, `captures/web-duel.png`, and `captures/web-pause.png`.
 
 ## Account deployment status
@@ -40,3 +40,12 @@ Do not paste a token into source, screenshots, chat logs, or this repository.
 - Firefox, Safari, mobile touch controls, audio, and human playtesting remain unverified.
 - The build is still the verified duel + breach slice; it is not the proposed 64-encounter campaign.
 - No analytics, telemetry, leaderboard, login, or cloud save is present.
+
+## Opaque-origin cabinet integration (current)
+
+- The current export is non-threaded with `GODOT_THREADS_ENABLED=false`.
+- The direct page passes WebGL2/title/duel/pause checks without requiring cross-origin isolation.
+- The sandbox test embeds the game with `sandbox="allow-scripts"`, receives `ARCADE_READY`, enters a live duel, and has no page/console errors.
+- WASM/PCK requests from the opaque origin require `Access-Control-Allow-Origin: *`.
+- `sandbox_polyfill.js` prevents Godot's optional PWA probe from logging a sandbox SecurityError.
+- The same build was mounted by LLM Arcade's `/dev/last-return` shell; its React bridge forwarded a synthetic score and achievement.

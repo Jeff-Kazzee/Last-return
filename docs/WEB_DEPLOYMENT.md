@@ -2,7 +2,7 @@
 
 ## Current status
 
-The Godot web export builds and runs in Chromium with WebGL2 and cross-origin isolation. The browser smoke gate verifies title → duel → pause input and distinct rendered states. The same gate passed against a temporary public Cloudflare Quick Tunnel URL: Cloudflare returned `200`, `application/wasm`, COOP/COEP, and the game reached the live duel and pause states.
+The Godot web export builds and runs in Chromium with WebGL2 using a non-threaded runtime. The browser smoke gate verifies both direct loading and an opaque-origin `sandbox="allow-scripts"` iframe, title → duel → pause input, and distinct rendered states. The same direct-page gate passed earlier against a temporary public Cloudflare Quick Tunnel URL. The LLM Arcade integration instead uses `/dev/last-return` with an opaque-origin sandbox and no cross-origin isolation.
 
 A permanent Cloudflare Pages deployment on the owner's account is **not yet claimed** because this cloud worker has no Cloudflare credential:
 
@@ -25,14 +25,13 @@ python3 scripts/serve_web.py --port 8090
 
 The export is `build/web/` and is intentionally ignored by Git. It contains `index.html`, JavaScript, WebAssembly, PCK, and the Cloudflare `_headers` contract.
 
-The web preset uses Godot's threaded Web template, so the host must return:
+The web preset uses Godot's **non-threaded** Web template. No SharedArrayBuffer or cross-origin isolation is required, which is necessary because LLM Arcade runs cabinets in an opaque-origin sandbox. The public WASM and PCK must allow the sandbox's `Origin: null` request:
 
 ```text
-Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: require-corp
+Access-Control-Allow-Origin: *
 ```
 
-Without both headers, browsers cannot provide the shared memory the threaded runtime needs. `web/_headers` is copied into the build for Cloudflare Pages. `scripts/serve_web.py` sends the same isolation headers for local verification.
+`web/_headers` includes the CORS contract for standalone Cloudflare Pages. `scripts/serve_web.py` and the LLM Arcade Vercel route send the same header.
 
 ## Browser verification
 
@@ -73,7 +72,7 @@ Alternative: configure a Cloudflare Pages project to deploy a prebuilt `build/we
 ## Production checks after deployment
 
 - Confirm the production URL returns HTML, JavaScript with a JavaScript MIME type, and `application/wasm` for the WebAssembly file.
-- Confirm both COOP and COEP headers on `/`, `/index.js`, `/index.wasm`, and `/index.pck`.
+- Confirm `Access-Control-Allow-Origin: *` and `Content-Type: application/wasm` on the cabinet assets.
 - Load the URL in a normal browser and record title → duel → pause → retry.
 - Test Chrome, Firefox, and Safari where available; test a phone separately.
 - Record build SHA, deployment ID, production URL, browser versions, and known limitations.
@@ -85,5 +84,5 @@ Alternative: configure a Cloudflare Pages project to deploy a prebuilt `build/we
 - No audio assets are present.
 - Progress is not persisted.
 - The current game is a first-to-three duel with rally escalation, PERFECT timing, focus BRAKE, bank pylons, adaptive rival play, and a two-lock breach—not the full 64-encounter campaign.
-- Threaded WebAssembly requires cross-origin isolation, which some embed contexts disallow.
+- The non-threaded build is required for opaque-origin iframe embedding. CORS must remain correctly scoped to public game assets.
 - No Windows export, online leaderboard, telemetry, or runtime AI service is included.
